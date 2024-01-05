@@ -72,6 +72,13 @@ async function writeChatInfoToFile(id, w, filePath) {
 }
 
 function tempClear(folderPath) {
+  // Проверяем, существует ли каталог
+  if (!fs.existsSync(folderPath)) {
+    // Если каталог не существует, создаем его
+    fs.mkdirSync(folderPath, { recursive: true });
+    return;
+  }
+
   // Получаем список файлов и папок внутри указанной папки
   const files = fs.readdirSync(folderPath);
 
