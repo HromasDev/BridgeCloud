@@ -129,8 +129,8 @@ app.use(express.urlencoded({ extended: true }));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-app.listen(80, () => {
-  console.log("Сервер Express запущен на порту 80");
+app.listen(3000, () => {
+  console.log("Сервер Express запущен на порту 3000");
   startBot();
 });
 
