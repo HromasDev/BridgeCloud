@@ -30,19 +30,6 @@
                     <form action="/get-files" id="filedrop" class="dropzone mb-5" enctype="utf-8">
                         <div id="output"></div>
                         <script>
-
-                            Dropzone.autoDiscover = false;
-                            var myDropzone = new Dropzone("#my-awesome-dropzone", {
-                              maxFiles: 1,
-                              timeout: 180000, // Установите таймаут здесь
-                              parallelUploads: 100,
-                              acceptedFiles: '.3gp,.3gp2,.h261,.h263,.h264,.jpgv,.jpm,.jpgm,.mp4,.mp4v,.mpg4,.mpeg,.mpg,.mpe,.m1v,.m2v,.ogv,.qt,.mov,.fli,.flv,.mks,.mkv,.wmv,.avi,.movie,.smv,.g3,.jpeg,.jpg,.jpe,.png,.btif,.sgi,.svg,.tiff,.tif',
-                              previewTemplate: previewTemplate,
-                              previewsContainer: "#previews",
-                              autoProcessQueue: false,
-                              clickable: ".fileinput-button",
-                            });
-
                             function convertBytes(bytes) {
                                 if (bytes >= 1024 * 1024) {
                                     return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
