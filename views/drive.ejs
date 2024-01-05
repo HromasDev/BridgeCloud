@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+    <script src="./dropzone.js"></script>
+    <link rel="stylesheet" href="./main.css">
+    <title>RofloDrive</title>
+</head>
+
+<body>
+    <div class="container d-flex pt-4">
+        <div class="vertical-menu nav col-3 flex-column pe-4">
+            <a class="nav-link text-dark" href="#nav-disk">Диск</a>
+            <a class="nav-link text-dark" href="#nav-recent">Недавние</a>
+            <a class="nav-link text-dark" href="#nav-favorite">Помеченые</a>
+            <a class="nav-link text-dark" href="#nav-basket">Корзина</a>
+        </div>
+        <div class="col">
+            <section>
+                <h2 class="px-5 py-4 border-bottom" id="nav-disk">Мой диск <img class="icon"
+                        src="public/assets/icons/drive.png"></h1>
+                    <form action="/get-files" id="filedrop" class="dropzone mb-5" enctype="utf-8">
+                        <div id="output"></div>
+                        <script>
+
+
+                            function convertBytes(bytes) {
+                                if (bytes >= 1024 * 1024) {
+                                    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+                                } else if (bytes >= 1024) {
+                                    return (bytes / 1024).toFixed(2) + ' KB';
+                                } else {
+                                    return bytes + ' B';
+                                }
+                            }
+
+                            let previousData;
+
+                            setInterval(() => {
+                                fetch(`app/userdata/unloads/248108772.json`)
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (JSON.stringify(data) !== JSON.stringify(previousData)) {
+                                            loadData();
+                                            previousData = data;
+                                        }
+                                    });
+                            }, 1000);
+
+                            window.onload = function () {
+                                loadData();
+                            }
+
+                            function loadData() {
+                                let xhr = new XMLHttpRequest();
+                                let url = `./app/userdata/unloads/248108772.json`;
+                                xhr.open('GET', url, true);
+                                xhr.onreadystatechange = function () {
+                                    if (xhr.readyState === 4 && xhr.status === 200) {
+                                        let data = JSON.parse(xhr.responseText);
+                                        let outputDiv = document.getElementById('output');
+                                        outputDiv.innerHTML = ''; // Clear the previous content
+                                        for (let key in data) {
+                                            let value = data[key];
+                                            let file = document.createElement('div');
+                                            file.classList.add('file');
+                                            let links = document.createElement('div');
+                                            links.classList.add('links');
+                                            let info = document.createElement('div');
+                                            info.classList.add('info');
+                                            let name = document.createElement('span');
+                                            name.classList.add('name');
+                                            let size = document.createElement('span');
+                                            size.classList.add('size');
+                                            let img = document.createElement('img');
+                                            img.classList.add('icon')
+                                            let download = document.createElement('a');
+                                            let remove = document.createElement('a')
+                                            if (value.ext === 'jpg' || value.ext === 'png' || value.ext === 'gif' || value.ext === 'image' || value.ext === 'ico') {
+                                                img.src = "public/assets/icons/photo.png";
+                                            } else if (value.ext === 'txt') {
+                                                img.src = "public/assets/icons/txt.png";
+                                            } else if (value.ext === 'exe') {
+                                                img.src = "public/assets/icons/exe.png";
+                                            } else if (value.ext === 'dll') {
+                                                img.src = "public/assets/icons/dll.png";
+                                            } else if (value.ext === 'rar' || value.ext === 'zip') {
+                                                img.src = "public/assets/icons/archive.png";
+                                            } else {
+                                                img.src = "public/assets/icons/file.png";
+                                            }
+                                            name.textContent = value.title;
+                                            size.textContent = convertBytes(value.size);
+                                            download.textContent = 'Скачать';
+                                            remove.textContent = 'Удалить';
+                                            download.href = value.url;
+                                            remove.onclick = () => {
+                                                location.href = `removeFile.php?file=${value.id}`;
+                                            }
+                                            file.appendChild(img);
+                                            file.appendChild(info);
+                                            file.appendChild(links);
+                                            info.appendChild(name);
+                                            info.appendChild(size);
+                                            links.appendChild(remove);
+                                            links.appendChild(download);
+                                            outputDiv.appendChild(file);
+                                        }
+                                    }
+                                };
+                                xhr.send();
+                            }
+
+                        </script>
+                    </form>
+            </section>
+            <section>
+                <h2 class="px-5 py-4 border-bottom" id="nav-recent">Недавние</h1>
+                    <form action="/drive" class="dropzone"></form>
+            </section>
+        </div>
+    </div>
+</body>
+
+</html>

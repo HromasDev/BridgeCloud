@@ -1,0 +1,188 @@
+@import url('./dropzone/dropzone.css');
+
+
+#uLogin {
+    width: 100px;
+    height: 100px;
+}
+
+#vk_auth,
+#vk_auth iframe {
+    margin: 0 auto;
+}
+
+body {
+    background-color: rgb(241, 241, 241);
+}
+
+.header {
+    background-color: white;
+}
+
+.header .nav-link:hover {
+    color: black !important;
+}
+
+.logo {
+    width: 90px;
+}
+
+.vertical-menu .nav-link {
+    transition: 0s;
+    border-radius: 10px;
+    border: 1px solid transparent;
+}
+
+.vertical-menu .nav-link:hover {
+    background-color: var(--bs-light);
+}
+
+.dropzone {
+    min-height: 100% !important;
+}
+
+.dropzone.dz-drag-hover {
+    border-color: var(--bs-gray);
+    border-style: dashed !important;
+}
+
+section {
+    background-color: white;
+    border-radius: 20px !important;
+}
+
+section .dropzone {
+    overflow-y: scroll;
+    border: none;
+    width: 100%;
+    height: 800px;
+}
+
+.dropzone {
+    z-index: 9999999 !important;
+}
+
+.dropzone .dz-preview {
+    margin: 0 auto;
+    border-radius: 0;
+    width: 100%
+}
+
+.dropzone .dz-preview .dz-image {
+    width: 100%;
+}
+
+.file {
+    margin: 10px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 0 0 20px 0;
+    border-radius: 10px;
+    gap: 20px;
+    background-color: var(--bs-light);
+    padding: 10px 20px;
+}
+
+
+#output {
+    margin: 10px;
+}
+
+.file .links a {
+    margin: 10px;
+    text-decoration: none !important;
+}
+
+.file .links {
+    text-decoration: none !important;
+    margin-left: auto;
+}
+
+.icon {
+    width: 50px;
+}
+
+/* Скрыть все элементы, кроме полосы загрузки */
+.dz-preview .dz-image,
+.dz-preview .dz-details,
+.dz-preview .dz-success-mark,
+.dz-preview .dz-error-mark {
+    display: none !important;
+}
+
+.dropzone {
+    padding: 0 !important;
+}
+
+.dropzone .dz-preview.dz-image-preview {
+    display: none;
+}
+
+/* Стили для полосы загрузки */
+.dz-preview .dz-progress {
+    border: 1px solid black;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 0px;
+}
+
+.dz-preview .dz-progress .dz-upload {
+    border: 1px solid black;
+    height: 100%;
+    background-color: #0f0;
+    border-radius: 5px;
+}
+
+.file .info {
+    display: grid;
+}
+
+.file .size {
+    color: var(--bs-gray);
+    font-size: 14px;
+}
+
+.cls-context-menu-link {
+    display: block;
+    padding: 20px;
+    background: #ECECEC;
+  }
+  
+  .cls-context-menu {
+    position: absolute;
+    display: none;
+  }
+  
+  .cls-context-menu ul,
+  #context-menu li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+  
+  .cls-context-menu {
+    border: solid 1px #CCC;
+  }
+  
+  .cls-context-menu li {
+    border-bottom: solid 1px #CCC;
+  }
+  
+  .cls-context-menu li:last-child {
+    border: none;
+  }
+  
+  .cls-context-menu li a {
+    display: block;
+    padding: 5px 10px;
+    text-decoration: none;
+    color: blue;
+  }
+  
+  .cls-context-menu li a:hover {
+    background: blue;
+    color: #FFF;
+  }
