@@ -122,7 +122,7 @@ app.use(express.urlencoded({ extended: true }));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-app.listen(80, () => {
+app.listen(80, '92.126.211.87', () => {
   console.log("Сервер Express запущен на порту 80");
   startBot();
 });
@@ -163,6 +163,12 @@ async function startBot() {
     } else res.redirect("/");
   });
 
+  app.get("/logout", async (req, res) => {
+
+    req.session.destroy();
+    res.redirect("/my-drive");
+  });
+
   var watcher = chokidar.watch("userdata/uploads", {
     ignored: /^\./,
     persistent: true,
@@ -172,9 +178,39 @@ async function startBot() {
     },
   });
 
+  async function updateData(req) {
+    try {
+      const users = await getChats();
+
+      if (users.find((x) => x.id === +req.session.authData.uid)) {
+        const dataToSend = users.find((x) => x.id === +req.session.authData.uid);
+
+        async function createDirectories() {
+          const id = dataToSend['id'];
+          const uploadsDir = `./userdata/uploads/${id}`;
+          const sessionsFile = `./userdata/sessions/${id}.json`;
+          const unloadsFile = `./userdata/unloads/${id}.json`;
+
+
+          if (!fs.existsSync(unloadsFile)) {
+            await writeChatInfoToFile(dataToSend['id'], false, unloadsFile);
+          } else {
+            await writeChatInfoToFile(dataToSend['id'], true, unloadsFile);
+          }
+        }
+        await createDirectories();
+        console.log('данные обновлены')
+
+        const jsonData = await fs.readFile(`./userdata/unloads/${req.session.authData.uid}.json`, 'utf-8');
+        const data = JSON.parse(jsonData);
+
+      }
+    } catch (error) { }
+  }
+
   const files = {}; // храним состояние файлов
 
-  app.post("/get-files", uploadFile.array("file"), async (req, res) => {
+  app.post("/send-files", uploadFile.array("file"), async (req, res) => {
     // обработка загрузки
 
     const authData = req.session.authData;
@@ -189,10 +225,18 @@ async function startBot() {
         };
 
         try {
+
           await sendFile(user_id, file_path);
+
+          await updateData(req);
+
+          res.json({ message: `File has been changed` });
+
 
           // успешно отправлен
           files[file_path].status = "sent";
+
+
         } catch (err) {
           // обработка ошибки
         } finally {
@@ -222,6 +266,56 @@ async function startBot() {
     }
   });
 
+
+
+  app.get('/get-data', async (req, res) => {
+    try {
+      await getChats();
+      const users = await getChats();
+
+      if (users.find((x) => x.id === +req.session.authData.uid)) {
+        const dataToSend = users.find((x) => x.id === +req.session.authData.uid);
+        const token = crypto.randomBytes(64).toString('hex');
+
+        async function createDirectories() {
+          const id = dataToSend['id'];
+          const uploadsDir = `./userdata/uploads/${id}`;
+          const sessionsFile = `./userdata/sessions/${id}.json`;
+          const unloadsFile = `./userdata/unloads/${id}.json`;
+
+          if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+          } else {
+            fs.removeSync(uploadsDir);
+          }
+          if (!fs.existsSync(sessionsFile)) {
+            fs.writeFileSync(sessionsFile, JSON.stringify({ ...dataToSend, token }, null, 2));
+          } else {
+            fs.writeFileSync(sessionsFile, JSON.stringify({ ...dataToSend, token }, null, 2), { flag: 'w' });
+          }
+          if (!fs.existsSync(unloadsFile)) {
+            await writeChatInfoToFile(dataToSend['id'], false, unloadsFile);
+          } else {
+            await writeChatInfoToFile(dataToSend['id'], true, unloadsFile);
+          }
+        }
+        await createDirectories();
+
+        const jsonData = await fs.readFile(`./userdata/unloads/${req.session.authData.uid}.json`, 'utf-8');
+        const data = JSON.parse(jsonData);
+
+        // send
+        res.json(data);
+
+
+      }
+    } catch (error) {
+      console.error('Ошибка чтения файла:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  });
+
+
   async function sendFile(user_id, file_path, callback) {
     try {
       // Загружаем файл на сервер VK
@@ -250,11 +344,20 @@ async function startBot() {
         }
 
         console.log(`Файл ${file_path} успешно удален!`);
+
       });
+
     } catch (error) {
       console.error("Ошибка при отправке файла:", error);
     }
   }
+
+
+  app.post("/delete-file", async (req, res) => {
+    await deleteFile(req.session.authData.uid, req.body.file);
+    res.status(200).send({ message: 'File deleted successfully' });
+  })
+
 
   async function deleteFile(user_id, message_ids) {
     try {
@@ -262,29 +365,33 @@ async function startBot() {
       await vk.api.messages.delete({
         peer_id: user_id,
         cmids: message_ids,
-        delete_for_all: 0,
+        delete_for_all: 1,
       });
 
       console.log(`Сообщение ${message_ids} успешно удалено!`);
+
     } catch (error) {
-      console.error(`Ошибка при удалении ${message_ids}: `, error);
+      await vk.api.messages.delete({
+        peer_id: user_id,
+        cmids: message_ids,
+        delete_for_all: 0,
+      });
+      
+      console.log(`Сообщение ${message_ids} было загружено позже лимита, успешно удалено только у бота.`);
+
     }
   }
 
-  //   chokidar
-  //     .watch("userdata/unloads/", { ignored: /(^|[\/\\])\../ })
-  //     .on("change", (filePath) => {
-  //       let data = JSON.parse(fs.readFileSync(filePath));
 
-  //       data.forEach((file, index) => {
-  //         if (file.deleted) {
-  //           deleteFile(file.owner_id, file.msgId);
-  //           data.splice(index, 1);
-  //         }
-  //       });
+  app.get('/your-route', async (req, res) => {
+    const watchd = chokidar.watch(`userdata/unloads/${req.session.authData.uid}.json`);
 
-  //       fs.writeFileSync(filePath, JSON.stringify(data));
-  //     });
+    watchd.on('change', async (path) => {
+      const fileContent = await fs.promises.readFile(`userdata/unloads/${req.session.authData.uid}.json`, 'utf8');
+      res.json({ message: `File has been changed`, consoleMessage: 'Your console message', content: fileContent });
+      watchd.close();
+    });
+  });
 
   const answers = {
     Начать: "Здравствуйте!",
@@ -296,7 +403,7 @@ async function startBot() {
         rimraf.sync(`./userdata/uploads/${msg.senderId}`);
         fs.unlink(`./userdata/unloads/${msg.senderId}.json`);
         fs.unlink(`./userdata/sessions/${msg.senderId}.json`);
-      } catch {}
+      } catch { }
     }
 
     if (answers[msg.text]) {
