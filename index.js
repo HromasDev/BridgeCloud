@@ -72,6 +72,13 @@ async function writeChatInfoToFile(id, w, filePath) {
 }
 
 function tempClear(folderPath) {
+  // Проверяем, существует ли каталог
+  if (!fs.existsSync(folderPath)) {
+    // Если каталог не существует, создаем его
+    fs.mkdirSync(folderPath, { recursive: true });
+    return;
+  }
+
   // Получаем список файлов и папок внутри указанной папки
   const files = fs.readdirSync(folderPath);
 
@@ -122,7 +129,7 @@ app.use(express.urlencoded({ extended: true }));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-app.listen(80, '92.126.211.87', () => {
+app.listen(80, () => {
   console.log("Сервер Express запущен на порту 80");
   startBot();
 });
