@@ -4,38 +4,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-    crossorigin="anonymous"></script>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-
-  <script src="./dropzone.js"></script>
   <link rel="stylesheet" href="./main.css">
   <title>BridgeCloud</title>
+  <script src="./main.js"></script>
 </head>
 
 <body>
+  <script>
+    document.body.classList.toggle(localStorage.getItem("theme"));
+  </script>
   <div class="container d-flex pt-4">
-
     <script type="text/javascript" src="https://vk.com/js/api/openapi.js?168" charset="windows-1251"></script>
     <script type="text/javascript">
       VK.init({ apiId: 51761794 });
     </script>
+    <div class="container pt-4 auth">
+      <form>
+        <h3 class="contrast-text">Авторизация</h3>
+        <label class="contrast-text" for="login">Логин</label>
+        <input class="contrast-text" type="text" placeholder="Ваш логин" id="login" name="login" required>
+        <label class="contrast-text" for="password">Пароль</label>
+        <input class="contrast-text" type="password" placeholder="Ваш пароль" id="password" name="password" required>
+        <p class="text-center error" id="error"></p>
 
-    <div id="vk_auth"></div>
-    <script type="text/javascript">
-      VK.Widgets.Auth("vk_auth", {
-        onAuth: function (user) {
-          fetch('/auth', {
+        <button type="submit">Войти</button>
+        <a class="contrast-text" href="/register">Создать новую учетную запись</a>
+      </form>
+
+      <div class="social">
+        <button id="vk_auth" onclick="login()">Войти через VK ID</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    function login() {
+      VK.Auth.login(function (response) {
+        if (response.session) {
+          fetch('/vk-auth', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify(user)
+            body: JSON.stringify(response.session.user)
           }).then(function (response) {
             if (response.ok) {
-              // Перенаправляем пользователя на /my-drive после успешного ответа
               window.location.href = "/my-drive";
             } else {
               throw new Error('Ошибка авторизации');
@@ -43,11 +56,39 @@
           }).catch(function (error) {
             console.log(error);
           });
+        } else {
+          alert('Не удалось авторизоваться');
         }
       });
+    }
+  </script>
+  <script>
+    document.querySelector('form').addEventListener('submit', function (e) {
+      e.preventDefault();
 
+      var login = document.getElementById('login').value;
+      var password = document.getElementById('password').value;
+      var error = document.getElementById('error');
 
-    </script>
+      fetch('/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ login: login, password: password }),
+      })
+        .then(response => {
+          if(response.ok) window.location.href = "/my-drive";
+          else error.innerHTML = data.error;
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    });
+  </script>
+  </script>
+  </div>
+  </script>
   </div>
 </body>
 

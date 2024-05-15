@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+    <link rel="stylesheet" href="./main.css">
+    <script src="./main.js"></script>
+    <title>BridgeCloud</title>
+
+    <!----===== Boxicons CSS ===== -->
+    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
+</head>
+
+<body>
+    <div class="container d-flex row pt-4">
+        <nav class="sidebar close">
+            <header>
+                <div class="image-text">
+                    <span class="image">
+                        <img src=<%=photo %> alt="">
+                    </span>
+                    <div class="text logo-text">
+                        <span class="name" id="username">
+                            <%= name %>
+                        </span>
+                    </div>
+                </div>
+
+                <i class='bx bx-chevron-right toggle'></i>
+            </header>
+
+            <div class="menu-bar">
+                <div class="menu">
+                    <ul class="menu-links">
+                        <li class="nav-link">
+                            <a href="/my-drive#nav-disk">
+                                <i class='bx bx-home-alt icon'></i>
+                                <span class="text nav-text">Главная</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-link">
+                            <a href="/my-drive#nav-recent">
+                                <i class='bx bx-time-five icon'></i>
+                                <span class="text nav-text">Недавние</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-link">
+                            <a href="/my-drive#nav-favourite">
+                                <i class='bx bx-star icon'></i>
+                                <span class="text nav-text">Избранные</span>
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+
+                <div class="bottom-content">
+                    <li class="">
+                        <a href="/settings">
+                            <i class='bx bx-cog icon'></i>
+                            <span class="text nav-text">Настройки</span>
+                        </a>
+                    </li>
+
+                    <li class="">
+                        <a href="/logout">
+                            <i class='bx bx-log-out icon'></i>
+                            <span class="text nav-text">Выход</span>
+                        </a>
+                    </li>
+
+                    <li class="mode">
+                        <div class="sun-moon">
+                            <i class='bx bx-moon icon moon'></i>
+                            <i class='bx bx-sun icon sun'></i>
+                        </div>
+                        <span class="mode-text text">Тёмная тема</span>
+                        <div class="toggle-switch">
+                            <span class="theme-switch"></span>
+                        </div>
+                    </li>
+
+                </div>
+            </div>
+        </nav>
+
+
+        <div class="workspace">
+            <section>
+                <form action="/save-file" method="post">
+                    <div class="editor">
+                        <h2 class="px-5 py-4 border-bottom contrast-text" id="nav-recent">
+                            <input type="text" name="file_name" class="contrast-text" value=<%=file_name %>>
+                        </h2>
+
+                        <textarea class="contrast-text" name="file_content"></textarea>
+                        <button type="submit">Сохранить</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+        <script>
+            const body = document.querySelector('body'),
+                sidebar = body.querySelector('nav'),
+                toggle = body.querySelector(".toggle"),
+                modeSwitch = body.querySelector(".toggle-switch"),
+                modeText = body.querySelector(".mode-text");
+            toggle.addEventListener("click", () => {
+                sidebar.classList.toggle("close");
+            })
+            modeSwitch.addEventListener("click", () => {
+                body.classList.toggle("dark");
+                if (body.classList.contains("dark")) {
+                    modeText.innerText = "Светлая тема";
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    modeText.innerText = "Тёмная тема";
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+        </script>
+
+        <footer>
+            <script>
+                document.body.classList.toggle(localStorage.getItem("theme"));
+            </script>
+        </footer>
+</body>
+
+</html>

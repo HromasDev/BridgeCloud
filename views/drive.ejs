@@ -4,35 +4,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-        crossorigin="anonymous"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-
     <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
     <link rel="stylesheet" href="./main.css">
+    <script src="./main.js"></script>
     <title>BridgeCloud</title>
+
+    <!----===== Boxicons CSS ===== -->
+    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
 </head>
 
 <body>
-    <div class="container d-flex pt-4">
-        <div class="vertical-menu nav col-3 flex-column pe-4">
-            <a class="nav-link text-dark" href="#nav-disk">Диск</a>
-            <a class="nav-link text-dark" href="#nav-recent">Недавние</a>
-            <a class="nav-link text-dark" href="#nav-favorite">Помеченые</a>
-            <a class="nav-link text-dark" href="#nav-basket">Корзина</a>
-            <a class="nav-link text-light bg-danger" href="/logout">Выход</a>
-        </div>
-        <div class="col">
+    <div class="container d-flex row pt-4">
+        <nav class="sidebar close">
+            <header>
+                <div class="image-text">
+                    <span class="image">
+                        <img src=<%=photo %> alt="">
+                    </span>
+                    <div class="text logo-text">
+                        <span class="name" id="username">
+                            <%= name %>
+                        </span>
+                    </div>
+                </div>
+
+                <i class='bx bx-chevron-right toggle'></i>
+            </header>
+
+            <div class="menu-bar">
+                <div class="menu">
+                    <ul class="menu-links">
+                        <li class="nav-link">
+                            <a href="/my-drive#nav-disk">
+                                <i class='bx bx-home-alt icon'></i>
+                                <span class="text nav-text">Главная</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-link">
+                            <a href="/my-drive#nav-recent">
+                                <i class='bx bx-time-five icon'></i>
+                                <span class="text nav-text">Недавние</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-link">
+                            <a href="/my-drive#nav-favourite">
+                                <i class='bx bx-star icon'></i>
+                                <span class="text nav-text">Избранные</span>
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+
+                <div class="bottom-content">
+                    <li class="">
+                        <a href="/settings">
+                            <i class='bx bx-cog icon'></i>
+                            <span class="text nav-text">Настройки</span>
+                        </a>
+                    </li>
+
+                    <li class="">
+                        <a href="/logout">
+                            <i class='bx bx-log-out icon'></i>
+                            <span class="text nav-text">Выход</span>
+                        </a>
+                    </li>
+
+                    <li class="mode">
+                        <div class="sun-moon">
+                            <i class='bx bx-moon icon moon'></i>
+                            <i class='bx bx-sun icon sun'></i>
+                        </div>
+                        <span class="mode-text text">Тёмная тема</span>
+                        <div class="toggle-switch">
+                            <span class="theme-switch"></span>
+                        </div>
+                    </li>
+
+                </div>
+            </div>
+        </nav>
+
+
+        <div class="workspace">
             <section>
-                <h2 class="px-5 py-4 border-bottom" id="nav-disk">Мой диск <img class="icon"
-                        src="./assets/icons/drive.png"></h1>
+                <h2 class="px-5 py-4 border-bottom contrast-text" id="nav-disk"><span id="root">/root</span></h1>
+                    <div class="create-file">
+                        <form method="post" action="/create-file">
+                            <input type="text" class="text" name="file_name" id="file_name" required>
+                            <button type="submit">
+                                <i class='bx bx-plus icon'></i>
+                            </button>
+                        </form>
+
+
+                    </div>
                     <form action="/send-files" id="filedrop" class="dropzone mb-5" enctype="utf-8">
+                        <input type="text" name="dir" id="dir" value="/root">
                         <div id="output">
                         </div>
                         <script>
+
+                            let files = [];
                             function convertBytes(bytes) {
                                 if (bytes >= 1024 * 1024) {
                                     return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
@@ -43,66 +120,236 @@
                                 }
                             }
 
-
-
                             Dropzone.options.filedrop = {
                                 maxFilesize: 4096,
+                                timeout: 60000,
                                 init: function () {
                                     this.on("addedfile", file => {
                                         fetch('/your-route')
                                             .then(response => response.json())
                                             .then(async data => {
                                                 const fileObject = JSON.parse(data.content);
-                                                await renderData(fileObject)
+                                                // Добавляем новый файл в существующий массив
+                                                files.push(fileObject);
+                                                // Вызываем renderData для каждого файла
+                                                renderData(fileObject)
                                                 this.removeFile(file)
                                             })
                                             .catch((error) => {
                                                 console.error('Error:', error);
                                             });
                                     });
-        
                                 }
                             }
 
+                            function getData() {
+                                fetch('/get-data')
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        files = data;
 
-                            fetch('/get-data')
-                                .then(response => response.json())
-                                .then(data => {
-                                    renderData(data);
-                                })
-                                .catch(error => console.error('Ошибка:', error));
+                                        files.forEach(file => {
+                                            renderData(file);
+                                        });
+                                    })
+                                    .catch(error => console.error('Ошибка:', error));
+                            }
+
+                            getData()
 
 
+                            let folderNames = new Set(); // Создаем новый Set
 
-                            function renderData(data) {
+                            let selected_dir = "";
+                            let test = []
+                            let currentLevel = 0; // Переместите это сюда
+                            function renderData(value) {
                                 let outputDiv = document.getElementById('output');
-                                outputDiv.innerHTML = ''; // Clear the previous content
-                                for (let key in data) {
-                                    let value = data[key];
-                                    let file = document.createElement('div');
-                                    file.classList.add('file');
-                                    let links = document.createElement('div');
-                                    links.classList.add('links');
-                                    let info = document.createElement('div');
-                                    info.classList.add('info');
-                                    let name = document.createElement('span');
-                                    name.classList.add('name');
-                                    let size = document.createElement('span');
-                                    size.classList.add('size');
-                                    let img = document.createElement('img');
-                                    img.classList.add('icon')
-                                    let download = document.createElement('a');
-                                    let remove = document.createElement('a')
+                                let renderedDirs = new Map();
+
+                                let file = document.createElement('div');
+                                file.classList.add('file');
+                                file.classList.add('contrast-text');
+                                let links = document.createElement('div');
+                                links.classList.add('links');
+                                let info = document.createElement('div');
+                                info.classList.add('info');
+                                let name = document.createElement('span');
+                                name.classList.add('name');
+                                let size = document.createElement('span');
+                                size.classList.add('size');
+                                let img = document.createElement('img');
+                                img.classList.add('icon')
+                                let download = document.createElement('a');
+                                let remove = document.createElement('a')
+
+                                function getSelectedDir(valuePath) {
+                                    let parts = valuePath.split('/');
+                                    parts.pop();
+                                    let selectedDir = parts.join('/') + '/';
+                                    return selectedDir;
+                                }
+
+
+                                function createSpanElement(nextFolder, r) {
+
+                                    // Создаем новый элемент span для папки
+                                    let newSpan = document.createElement('span');
+                                    newSpan.textContent = '/' + nextFolder;
+                                    newSpan.dataset.path = r; // Сохраняем полный путь в атрибуте data-path
+                                    newSpan.dataset.id = currentLevel + 1; // Сохраняем полный путь в атрибуте data-path
+
+                                    newSpan.onclick = () => {
+
+                                        if (selected_dir === newSpan.dataset.path) {
+                                            return;
+                                        }
+                                        selected_dir = newSpan.dataset.path; // Обновляем selected_dir из атрибута data-path
+                                        document.getElementById('dir').value = '/root' + selected_dir;
+                                        document.getElementById('file_name').value = selected_dir;
+
+                                        currentLevel = +newSpan.dataset.id;
+                                        folderNames.clear()
+                                        outputDiv.innerHTML = ''; // Clear the previous content
+                                        // Получаем все элементы span в nav-disk
+                                        let navDisk = document.getElementById('nav-disk');
+                                        let spans = navDisk.getElementsByTagName('span');
+
+
+                                        // Если мы переходим назад, удаляем последний элемент span
+                                        if (currentLevel < spans.length - 1) {
+                                            for (let i = spans.length - 1; i > currentLevel; i--) {
+                                                navDisk.removeChild(spans[i]);
+                                            }
+                                        } else {
+                                            navDisk.appendChild(newSpan);
+                                        }
+
+                                        // Фильтруем массив files, чтобы получить только файлы из текущей папки
+                                        let filesInCurrentFolder = files.filter(file => file.path.startsWith(selected_dir));
+
+                                        // Если в текущей папке есть файлы, обновляем название папки
+                                        if (filesInCurrentFolder.length > 0) {
+                                            name.textContent = nextFolder;
+                                        }
+
+                                        // Для каждого файла в текущей папке вызываем renderData
+                                        filesInCurrentFolder.forEach(file => {
+                                            renderData(file);
+                                        });
+                                    };
+
+                                    let navDisk = document.getElementById('nav-disk');
+                                    navDisk.appendChild(newSpan);
+                                }
+
+                                if ((selected_dir + value.title) !== value.path) {
+                                    let folderName = value.path.split('/')[currentLevel];
+
+                                    if (!folderNames.has(folderName)) { // Проверяем, есть ли уже такое имя папки
+                                        folderNames.add(folderName); // Если нет, добавляем его в Set
+
+                                        let rootSpan = document.getElementById('root');
+
+                                        // Добавляем обработчик событий onclick
+                                        rootSpan.onclick = () => {
+                                            // Обновляем selected_dir на корневую директорию
+                                            selected_dir = '';
+
+                                            // Обновляем поле ввода 'dir'
+                                            document.getElementById('dir').value = '/root';
+                                            document.getElementById('file_name').value = '';
+
+                                            // Сбрасываем уровень вложенности
+                                            currentLevel = 0;
+
+                                            // Очищаем folderNames и outputDiv
+                                            folderNames.clear();
+                                            outputDiv.innerHTML = '';
+
+                                            // Обновляем nav-disk
+                                            let navDisk = document.getElementById('nav-disk');
+                                            navDisk.innerHTML = '<span id="root">/root</span>';
+
+                                            // Фильтруем массив files, чтобы получить только файлы из корневой директории
+                                            let filesInRootFolder = files.filter(file => file.path.startsWith(selected_dir));
+
+                                            // Для каждого файла в корневой директории вызываем renderData
+                                            filesInRootFolder.forEach(file => {
+                                                renderData(file);
+                                            });
+                                        };
+
+
+                                        img.src = "./assets/icons/folder.png";
+                                        name.textContent = folderName; // Добавляем название папки
+                                        let r = ""
+
+                                        file.onclick = () => {
+
+
+                                            // Получаем путь к текущей папке
+                                            let currentFolderPath = value.path.split('/');
+                                            let nextFolder = currentFolderPath[currentLevel];
+
+                                            // Добавляем следующую папку в selected_dir
+                                            selected_dir += nextFolder + '/';
+
+                                            let r = ""
+                                            for (let i = 0; i <= currentLevel; i++) {
+                                                r += currentFolderPath[i] + '/'
+                                            }
+                                            document.getElementById('dir').value = '/root/' + selected_dir;
+
+                                            document.getElementById('file_name').value = selected_dir;
+
+                                            // Call the new function to create the span elements
+                                            createSpanElement(nextFolder, r);
+
+                                            // Обновляем название папки
+                                            name.textContent = nextFolder;
+
+                                            // Увеличиваем уровень вложенности
+                                            currentLevel++;
+
+                                            outputDiv.innerHTML = ''; // Clear the previous content
+                                            // При нажатии на папку перерендериваем содержимое
+
+                                            // Фильтруем массив files, чтобы получить только файлы из текущей папки
+                                            let filesInCurrentFolder = files.filter(file => file.path.startsWith(selected_dir));
+
+                                            // Для каждого файла в текущей папке вызываем renderData
+                                            filesInCurrentFolder.forEach(file => {
+                                                renderData(file);
+                                            });
+                                        }
+
+                                    } else return
+                                }
+                                else {
+                                    // Иначе создаем файл
                                     if (value.ext === 'jpg' || value.ext === 'png' || value.ext === 'gif' || value.ext === 'image' || value.ext === 'ico') {
                                         img.src = "./assets/icons/photo.png";
                                     } else if (value.ext === 'txt') {
                                         img.src = "./assets/icons/txt.png";
                                     } else if (value.ext === 'exe') {
                                         img.src = "./assets/icons/exe.png";
+                                    } else if (value.ext === 'py') {
+                                        img.src = "./assets/icons/py.png";
                                     } else if (value.ext === 'dll') {
                                         img.src = "./assets/icons/dll.png";
+                                    } else if (value.ext === 'torrent') {
+                                        img.src = "./assets/icons/torrent.png";
                                     } else if (value.ext === 'rar' || value.ext === 'zip') {
                                         img.src = "./assets/icons/archive.png";
+                                    } else if (value.ext === 'ppt' || value.ext === 'pptx') {
+                                        img.src = "./assets/icons/power_point.png";
+                                    } else if (value.ext === 'doc' || value.ext === 'docx') {
+                                        img.src = "./assets/icons/word.png";
+                                    } else if (value.ext === 'xls' || value.ext === 'xlsx' || value.ext === 'xlsm' || value.ext === 'xltx' || value.ext === 'xltm') {
+                                        img.src = "./assets/icons/excel.png";
+                                    } else if (value.ext === 'mdb' || value.ext === 'accdb' || value.ext === 'mde' || value.ext === 'ldb' || value.ext === 'laccdb') {
+                                        img.src = "./assets/icons/access.png";
                                     } else {
                                         img.src = "./assets/icons/file.png";
                                     }
@@ -121,31 +368,66 @@
                                             body: JSON.stringify({ file: value.msgId }),
                                         })
                                             .then(response => response.json())
-                                            .then(data => console.log(data))
+                                            .then(data => {
+                                                files = files.filter(file => file.msgId !== value.msgId);
+                                            })
                                             .catch((error) => {
                                                 console.error('Error:', error);
                                             });
-
                                     }
-                                    file.appendChild(img);
-                                    file.appendChild(info);
-                                    file.appendChild(links);
-                                    info.appendChild(name);
-                                    info.appendChild(size);
-                                    links.appendChild(remove);
-                                    links.appendChild(download);
-                                    outputDiv.appendChild(file);
                                 }
+                                file.appendChild(img);
+                                file.appendChild(info);
+                                file.appendChild(links);
+                                info.appendChild(name);
+                                info.appendChild(size);
+                                links.appendChild(remove);
+                                links.appendChild(download);
+                                outputDiv.appendChild(file);
                             }
+
+
+
                         </script>
                     </form>
             </section>
             <section>
-                <h2 class="px-5 py-4 border-bottom" id="nav-recent">Недавние</h1>
-                    <form action="/drive" class="dropzone"></form>
+                <h2 class="px-5 py-4 border-bottom contrast-text" id="nav-recent">Недавние</h1>
+                    <div class="dropzone">
+                        </form>
+            </section>
+            <section>
+                <h2 class="px-5 py-4 border-bottom contrast-text" id="nav-favourite">Избранное</h1>
+                    <div class="dropzone">
+                        </form>
             </section>
         </div>
-    </div>
+        <script>
+            const body = document.querySelector('body'),
+                sidebar = body.querySelector('nav'),
+                toggle = body.querySelector(".toggle"),
+                modeSwitch = body.querySelector(".toggle-switch"),
+                modeText = body.querySelector(".mode-text");
+            toggle.addEventListener("click", () => {
+                sidebar.classList.toggle("close");
+            })
+            modeSwitch.addEventListener("click", () => {
+                body.classList.toggle("dark");
+                if (body.classList.contains("dark")) {
+                    modeText.innerText = "Светлая тема";
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    modeText.innerText = "Тёмная тема";
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+        </script>
+
+        <footer>
+            <script>
+                document.body.classList.toggle(localStorage.getItem("theme"));
+            </script>
+        </footer>
 </body>
 
 </html>

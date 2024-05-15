@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="./dropzone.js"></script>
+  <link rel="stylesheet" href="./main.css">
+  <title>BridgeCloud</title>
+  <script src="./main.js"></script>
+</head>
+
+<body>
+  <script>
+    document.body.classList.toggle(localStorage.getItem("theme"));
+  </script>
+
+  <div class="container pt-4 auth">
+    <form>
+      <h3 class="contrast-text">Регистрация</h3>
+      <label class="contrast-text" for="login">Логин</label>
+      <input class="contrast-text" type="text" placeholder="Ваш логин" id="login" name="login" required>
+
+      <label class="contrast-text" for="password">Пароль</label>
+      <input class="contrast-text" type="password" placeholder="Ваш пароль" id="password" name="password" required minlength="6">
+      <p class="text-center" id="error"></p>
+
+      <button type="submit">Зарегистрироваться</button>
+      <a class="contrast-text" href="/">Авторизироваться</a>
+    </form>
+  </div>
+
+  <script>
+    document.querySelector('form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var login = document.getElementById('login').value;
+      var password = document.getElementById('password').value;
+      var error = document.getElementById('error');
+
+      fetch('/reg', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ login: login, password: password }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) error.innerHTML = data.error;
+          else window.location.href = "/";
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    });
+  </script>
+</body>
+</html>
