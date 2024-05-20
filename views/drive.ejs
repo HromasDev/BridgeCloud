@@ -60,31 +60,38 @@
                 </div>
 
                 <div class="bottom-content">
-                    <li class="">
-                        <a href="/settings">
-                            <i class='bx bx-cog icon'></i>
-                            <span class="text nav-text">Настройки</span>
-                        </a>
-                    </li>
+                    <% if (isAdmin) { %>
+                        <li class="">
+                            <a href="/admin">
+                                <i class='bx bx-lock-alt icon'></i>
+                                <span class="text nav-text">Админ-панель</span>
+                            </a>
+                        </li>
+                        <% } %>
+                            <li class="">
+                                <a href="/settings">
+                                    <i class='bx bx-cog icon'></i>
+                                    <span class="text nav-text">Настройки</span>
+                                </a>
+                            </li>
 
-                    <li class="">
-                        <a href="/logout">
-                            <i class='bx bx-log-out icon'></i>
-                            <span class="text nav-text">Выход</span>
-                        </a>
-                    </li>
+                            <li class="">
+                                <a href="/logout">
+                                    <i class='bx bx-log-out icon'></i>
+                                    <span class="text nav-text">Выход</span>
+                                </a>
+                            </li>
 
-                    <li class="mode">
-                        <div class="sun-moon">
-                            <i class='bx bx-moon icon moon'></i>
-                            <i class='bx bx-sun icon sun'></i>
-                        </div>
-                        <span class="mode-text text">Тёмная тема</span>
-                        <div class="toggle-switch">
-                            <span class="theme-switch"></span>
-                        </div>
-                    </li>
-
+                            <li class="mode">
+                                <div class="sun-moon">
+                                    <i class='bx bx-moon icon moon'></i>
+                                    <i class='bx bx-sun icon sun'></i>
+                                </div>
+                                <span class="mode-text text">Тёмная тема</span>
+                                <div class="toggle-switch">
+                                    <span class="theme-switch"></span>
+                                </div>
+                            </li>
                 </div>
             </div>
         </nav>
@@ -95,7 +102,8 @@
                 <h2 class="px-5 py-4 border-bottom contrast-text" id="nav-disk"><span id="root">/root</span></h1>
                     <div class="create-file">
                         <form method="post" action="/create-file">
-                            <input type="text" class="text" name="file_name" id="file_name" required>
+                            <input type="text" class="text" name="file_name" id="file_name" required
+                                placeholder="Введите название файла">
                             <button type="submit">
                                 <i class='bx bx-plus icon'></i>
                             </button>
@@ -122,7 +130,7 @@
 
                             Dropzone.options.filedrop = {
                                 maxFilesize: 4096,
-                                timeout: 60000,
+                                timeout: 1800000,
                                 init: function () {
                                     this.on("addedfile", file => {
                                         fetch('/your-route')

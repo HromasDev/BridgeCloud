@@ -13,27 +13,25 @@
   <script>
     document.body.classList.toggle(localStorage.getItem("theme"));
   </script>
-  <div class="container d-flex pt-4">
-    <script type="text/javascript" src="https://vk.com/js/api/openapi.js?168" charset="windows-1251"></script>
-    <script type="text/javascript">
-      VK.init({ apiId: 51761794 });
-    </script>
-    <div class="container pt-4 auth">
-      <form>
-        <h3 class="contrast-text">Авторизация</h3>
-        <label class="contrast-text" for="login">Логин</label>
-        <input class="contrast-text" type="text" placeholder="Ваш логин" id="login" name="login" required>
-        <label class="contrast-text" for="password">Пароль</label>
-        <input class="contrast-text" type="password" placeholder="Ваш пароль" id="password" name="password" required>
-        <p class="text-center error" id="error"></p>
+  <script type="text/javascript" src="https://vk.com/js/api/openapi.js?168" charset="windows-1251"></script>
+  <script type="text/javascript">
+    VK.init({ apiId: 51761794 });
+  </script>
+  <div class="container pt-4 auth">
+    <form>
+      <h3 class="contrast-text">Авторизация</h3>
+      <label class="contrast-text" for="login">Логин</label>
+      <input class="contrast-text" type="text" placeholder="Ваш логин" id="login" name="login" required>
+      <label class="contrast-text" for="password">Пароль</label>
+      <input class="contrast-text" type="password" placeholder="Ваш пароль" id="password" name="password" required>
+      <p class="error" id="error"></p>
 
-        <button type="submit">Войти</button>
-        <a class="contrast-text" href="/register">Создать новую учетную запись</a>
-      </form>
+      <button type="submit">Войти</button>
+      <a class="contrast-text" href="/register">Создать новую учетную запись</a>
+    </form>
 
-      <div class="social">
-        <button id="vk_auth" onclick="login()">Войти через VK ID</button>
-      </div>
+    <div class="social">
+      <button id="vk_auth" onclick="login()">Войти через VK ID</button>
     </div>
   </div>
 
@@ -77,9 +75,10 @@
         },
         body: JSON.stringify({ login: login, password: password }),
       })
-        .then(response => {
-          if(response.ok) window.location.href = "/my-drive";
-          else error.innerHTML = data.error;
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) error.innerHTML = data.error;
+          else window.location.href = "/";
         })
         .catch((error) => {
           console.error('Error:', error);

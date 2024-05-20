@@ -59,6 +59,14 @@
                 </div>
 
                 <div class="bottom-content">
+                    <% if (isAdmin) { %>
+                    <li class="">
+                        <a href="/admin">
+                            <i class='bx bx-lock-alt icon'></i>
+                            <span class="text nav-text">Админ-панель</span>
+                        </a>
+                    </li>
+                    <% } %>
                     <li class="">
                         <a href="/settings">
                             <i class='bx bx-cog icon'></i>
@@ -98,7 +106,7 @@
             </section>
 
             <section class="px-5 py-4">
-                <h1 class="contrast-text">Пароль</h1>
+                <h1 class="contrast-text">Изменить пароль</h1>
                 <form id="change-password">
                     <label class="contrast-text" for="login">Логин</label>
                     <input class="contrast-text" type="text" placeholder="Ваш логин" id="login" required>

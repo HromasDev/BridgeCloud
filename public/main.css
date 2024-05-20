@@ -1,6 +1,3 @@
-@import url('./dropzone/dropzone.css');
-
-
 #uLogin {
     width: 100px;
     height: 100px;
@@ -218,7 +215,7 @@ section .dropzone {
 }
 
 .auth {
-    width: 600px;
+    max-width: 500px !important;
     background-color: rgba(255, 255, 255, 0.13);
     position: absolute;
     transform: translate(-50%, -50%);
@@ -254,7 +251,7 @@ section .dropzone {
     margin: 10px 0;
 }
 
-label {
+.auth label {
     display: block;
     margin-top: 30px;
     font-size: 16px;
@@ -282,8 +279,8 @@ input {
     font-weight: 300;
 }
 
-::placeholder {
-    color: #e5e5e5;
+input::placeholder {
+    color: var(--text-color);
 }
 
 button {
@@ -319,10 +316,6 @@ button {
     margin-right: 4px;
 }
 
-.auth {
-    width: 500px !important;
-}
-
 .settings input {
     background-color: var(--body-color) !important;
     margin: 10px 0;
@@ -337,14 +330,18 @@ button {
     outline: none;
 }
 
+.error,
+.success {
+    text-align: center;
+    height: 40px;
+}
+
 .error {
-    color: red;
-    padding: 10px 0;
+    color: #f44336 !important;
 }
 
 .success {
-    padding: 10px 0;
-    color: green;
+    color: #36eb85 !important;
 }
 
 .create-file {
@@ -404,6 +401,7 @@ button {
     background-color: var(--primary-color) !important;
     border: none;
     outline: none;
+    margin: 50px 0 0 0;
     color: white;
 }
 
@@ -417,10 +415,124 @@ button {
 
 
 
+.users-list {
+    width: 100%;
+}
+
+.users-list input {
+    color: var(--text-color)
+}
+
+.users-list input[readonly] {
+    color: grey !important;
+}
 
 
+.form-check {
+    display: flex;
+}
+
+.form-check input[type="checkbox"] {
+    height: 20px;
+}
 
 
+.button-cover,
+.knobs,
+.layer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.button {
+    position: relative;
+    top: 50%;
+    width: 74px;
+    height: 36px;
+    margin: auto;
+    overflow: hidden;
+}
+
+.button.r,
+.button.r .layer {
+    border-radius: 100px;
+}
+
+.button.b2 {
+    border-radius: 2px;
+}
+
+.checkbox {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 3;
+}
+
+.knobs {
+    z-index: 2;
+}
+
+.layer {
+    width: 100%;
+    background-color: var(--body-color);
+    transition: 0.3s ease all;
+    z-index: 1;
+}
+
+#button-switch .knobs:before,
+#button-switch .knobs span {
+    content: "ВЫКЛ";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 28px;
+    height: 28px;
+    color: #fff;
+    font-size: 8px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1;
+    padding: 9px 0px;
+}
+
+#button-switch .knobs:before {
+    transition: 0.3s ease all, left 0.5s cubic-bezier(0.18, 0.89, 0.35, 1.15);
+    z-index: 2;
+}
+
+#button-switch .knobs span {
+    background-color: #f44336;
+    border-radius: 2px;
+    transition: 0.3s ease all, left 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15);
+    z-index: 1;
+}
+
+#button-switch .checkbox:checked+.knobs:before {
+    content: "ВКЛ";
+    left: 42px;
+}
+
+#button-switch .checkbox:checked+.knobs span {
+    left: 42px;
+    background-color: #36eb85;
+}
+
+.deleteUser {
+    width: 40px;
+}
+
+.deleteUser:hover {
+    transition: var(--tran-05);
+    background-color: #f44336 !important;
+}
 
 
 
@@ -796,30 +908,183 @@ body.dark .home .text {
     justify-content: space-between;
 }
 
+@media (max-width: 450px) {
+    .container {
+        font-size: 3vw;
+    }
+}
 
-@media (min-width: 576px) {
+@media (max-width: 768px) {
+    .deleteUser {
+        width: 100%;
+    }
+
+    .workspace {
+        margin: 0 0 180px 0;
+    }
+
+    .button {
+        width: 100%;
+        margin-bottom: 90px;
+    }
+
+    #button-switch .knobs:before,
+    #button-switch .knobs span {
+        content: "АДМИН ПРАВА - ВЫКЛ";
+        width: 50%;
+    }
+
+    #button-switch .checkbox:checked+.knobs:before {
+        content: "АДМИН ПРАВА - ВКЛ";
+        left: 49%;
+    }
+
+    #button-switch .checkbox:checked+.knobs span {
+        left: 49%;
+    }
+
+    table {
+        border: 0;
+    }
+
+    table thead {
+        display: none;
+    }
+
+    table tr {
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    table td {
+        display: block;
+        text-align: right;
+        font-size: 13px;
+        border-right: 1px solid transparent;
+    }
+
+    table td:last-child {
+        border-bottom: 0;
+    }
+
+    table td:before {
+        content: attr(data-label);
+        float: left;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+
+    .sidebar {
+        top: auto;
+        bottom: 0;
+    }
+
+    i.bx.bx-cog.icon {
+        width: 100%;
+    }
+
+    .sidebar li a {
+        justify-content: center;
+    }
+
+    .menu-bar {
+        flex-direction: row !important;
+    }
+
+    .menu-bar {
+        height: 88px !important;
+    }
+
+    span.text.nav-text {
+        display: none;
+    }
+
+    li {
+        width: 85px;
+    }
+
+    .menu-bar {
+        justify-content: center !important;
+    }
+
+    ul.menu-links {
+        height: 100%;
+    }
+
+    header {
+        display: none;
+    }
+
+    li.nav-link:nth-child(3) {
+        display: none;
+    }
+
+    ul.menu-links {
+        display: flex;
+    }
+
+    nav.sidebar.close {
+        width: 100%;
+        height: 88px;
+    }
+
+    .menu {
+        margin-top: 0 !important;
+    }
+
+    li.nav-link:nth-child(2) {
+        display: none;
+    }
+
+    .bottom-content {
+        display: flex;
+    }
+
+    li.mode {
+        display: none;
+    }
+}
+
+@media (min-width: 768px) {
 
     .container,
     .container-sm {
         max-width: 540px;
     }
-}
 
-@media (min-width: 768px) {
-    .container {
-        max-width: 720px;
+    .auth {
+        max-width: 100%;
     }
 }
 
-@media (min-width: 992px) {
+
+@media (min-width: 920px) {
     .container {
-        max-width: 960px;
+        max-width: 720px;
+    }
+
+    .auth {
+        max-width: 500px;
     }
 }
 
 @media (min-width: 1200px) {
     .container {
-        max-width: 1240px;
+        max-width: 960px;
+    }
+}
+
+@media (min-width: 1500px) {
+    .container {
+        max-width: 1120px;
+    }
+}
+
+@media (min-width: 1200px) {
+
+    .h2,
+    h2 {
+        font-size: 2rem;
     }
 }
 
@@ -865,13 +1130,7 @@ h6 {
     line-height: 1.2;
 }
 
-@media (min-width: 1200px) {
 
-    .h2,
-    h2 {
-        font-size: 2rem;
-    }
-}
 
 .py-4 {
     padding-top: 1.5rem !important;
@@ -947,18 +1206,4 @@ h6 {
 
 .switch input:checked+.slider {
     box-shadow: 0 0 0 2px limeGreen, 0 0 8px limeGreen;
-}
-
-.switch200 .slider:before {
-    width: 200%;
-    transform: translateX(-82px);
-    /*translateX(-(w-h))*/
-}
-
-.switch200 input:checked+.slider:before {
-    background-color: red;
-}
-
-.switch200 input:checked+.slider {
-    box-shadow: 0 0 0 2px red, 0 0 8px red;
 }

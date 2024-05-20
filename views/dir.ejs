@@ -60,6 +60,14 @@
                 </div>
 
                 <div class="bottom-content">
+                    <% if (isAdmin) { %>
+                    <li class="">
+                        <a href="/admin">
+                            <i class='bx bx-lock-alt icon'></i>
+                            <span class="text nav-text">Админ-панель</span>
+                        </a>
+                    </li>
+                    <% } %>
                     <li class="">
                         <a href="/settings">
                             <i class='bx bx-cog icon'></i>

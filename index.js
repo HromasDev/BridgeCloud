@@ -167,7 +167,10 @@ app.listen(80, () => {
 });
 
 // создаем экземпляр Upload
-const upload = new Upload(vk);
+const upload = new Upload({
+  api: vk.api,
+  uploadTimeout: 1800000,
+})
 
 async function startBot() {
   console.log("Бот запущен!");
@@ -285,6 +288,7 @@ async function startBot() {
         name: data.name,
         photo: data.photo,
         verified: data.verified,
+        isAdmin: data.isAdmin,
       };
     }
 
@@ -380,6 +384,7 @@ async function startBot() {
           name: data.name,
           photo: data.photo,
           verified: data.verified,
+          isAdmin: data.isAdmin
         };
       }
 
@@ -521,7 +526,96 @@ async function startBot() {
     const data = req.session.authData;
 
     if (data && data.accepted) {
-      res.render("drive", { name: data.name, photo: data.photo, dir: req.query });
+      res.render("drive", { name: data.name, photo: data.photo, dir: req.query, isAdmin: data.isAdmin });
+    } else res.redirect("/");
+  });
+
+  app.post("/get-users", async (req, res) => {
+    const data = req.session.authData;
+    if (data && data.isAdmin) {
+      const users = await new Promise((resolve, reject) => {
+        db.query('SELECT id, vk_id, login, isAdmin FROM users', function (error, results) {
+          if (error) reject(error);
+          else resolve(results);
+        });
+      });
+
+      if (users.length > 0) {
+        const files = await new Promise((resolve, reject) => {
+          db.query('SELECT * FROM files', function (error, results) {
+            if (error) reject(error);
+            else resolve(results);
+          });
+        })
+
+        users.forEach((user) => {
+          const userfiles = files.filter((file) => file.user_id === user.id);
+          user["files"] = userfiles.length;
+        });
+      }
+
+      res.json(users);
+    }
+  });
+
+  app.post("/update-users", async (req, res) => {
+    const data = req.session.authData;
+    if (data && data.isAdmin) {
+      const users = req.body;
+      try {
+        await Promise.all(users.map(user => {
+          return new Promise((resolve, reject) => {
+            db.query(
+              'UPDATE users SET vk_id = ?, login = ?, isAdmin = ? WHERE id = ?',
+              [user.vk_id, user.login, user.isAdmin, user.id],
+              (error, results) => {
+                if (error) reject(error);
+                else resolve(results);
+              }
+            );
+          });
+        }));
+
+        res.status(200).json({ message: 'Users updated successfully' });
+      } catch (error) {
+        res.status(500).json({ error: 'Failed to update users' });
+      }
+    } else {
+      res.status(403).json({ error: 'Unauthorized' });
+    }
+  });
+
+  app.post("/change-permission", async (req, res) => {
+    const data = req.session.authData;
+    if (data && data.isAdmin) {
+      const { id, isAdmin } = req.body;
+
+      try {
+        await new Promise((resolve, reject) => {
+          db.query(
+            'UPDATE users SET isAdmin = ? WHERE id = ?',
+            [isAdmin, id],
+            (error, results) => {
+              if (error) reject(error);
+              else resolve(results);
+            }
+          );
+        });
+
+        res.status(200).json({ message: 'User permission updated successfully' });
+      } catch (error) {
+        res.status(500).json({ error: 'Failed to update user permission' });
+      }
+    } else {
+      res.status(403).json({ error: 'Unauthorized' });
+    }
+  });
+
+  app.get("/admin", async (req, res) => {
+    const data = req.session.authData;
+
+    if (data && data.isAdmin) {
+      res.render("admin", { name: data.name, photo: data.photo, isAdmin: data.isAdmin });
     } else res.redirect("/");
   });
 
@@ -529,7 +623,7 @@ async function startBot() {
     const data = req.session.authData;
 
     if (data && data.accepted) {
-      res.render("create-file", { name: data.name, photo: data.photo, file_name: req.body.file_name });
+      res.render("create-file", { name: data.name, photo: data.photo, isAdmin: data.isAdmin, file_name: req.body.file_name });
     } else res.redirect("/");
   });
 
@@ -567,11 +661,11 @@ async function startBot() {
 
     if (data && data.accepted) {
       if (data.verified === 1) {
-        res.render("full_settings", { name: data.name, photo: data.photo });
+        res.render("full_settings", { name: data.name, photo: data.photo, isAdmin: data.isAdmin });
       } else if (data.vk_id == null) {
-        res.render("settings", { name: data.name, photo: data.photo });
+        res.render("settings", { name: data.name, photo: data.photo, isAdmin: data.isAdmin });
       } else {
-        res.render("notverifed_settings", { name: data.name, photo: data.photo });
+        res.render("notverifed_settings", { name: data.name, photo: data.photo, isAdmin: data.isAdmin });
       }
     } else res.redirect("/");
   });
@@ -790,6 +884,22 @@ async function startBot() {
 
     res.redirect('/logout');
   })
+
+  app.post("/delete-user", async (req, res) => {
+    const data = req.session.authData;
+    if (data && data.isAdmin) {
+      const { id } = req.body;
+
+      db.query('DELETE FROM users WHERE id = ?', [id]);
+      db.query('DELETE FROM files WHERE user_id = ?', [id]);
+      db.query('DELETE FROM user_settings WHERE user_id = ?', [id]);
+
+      res.status(200).json({ success: true, message: 'User deleted successfully' });
+    } else {
+      res.status(403).json({ success: false, error: 'Unauthorized' });
+    }
+  });
+
 
   async function deleteFile(user_id, message_ids) {
     try {
