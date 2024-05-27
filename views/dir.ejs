@@ -20,12 +20,14 @@
             <header>
                 <div class="image-text">
                     <span class="image">
-                        <img src=<%=photo %> alt="">
+                        <label for="photoInput">
+                            <i class='bx bx-plus upload-photo'></i>
+                        </label>
+                        <input type="file" id="photoInput" accept="image/*">
+                        <img id="photo" src="<%=photo %>" alt="">
                     </span>
                     <div class="text logo-text">
-                        <span class="name" id="username">
-                            <%= name %>
-                        </span>
+                        <input class="name text" type="text" id="username" value='<%= name %>'>
                     </div>
                 </div>
 

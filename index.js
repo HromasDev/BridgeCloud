@@ -12,6 +12,7 @@ const async = require("async");
 var mysql = require('mysql');
 const generatePassword = require("password-generator");
 const { toUpper, update } = require("lodash");
+const bodyParser = require('body-parser');
 
 var db = mysql.createConnection({
   host: process.env.HOST,
@@ -142,6 +143,8 @@ app.use(
   })
 );
 
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -248,6 +251,73 @@ async function startBot() {
       res.json({ success: false, error: 'Ошибка обновления пароля' });
     }
   })
+
+  app.post('/update-username', async (req, res) => {
+    if (!req.body || !req.session.authData) {
+      return res.status(400).json({ error: 'No username or userId provided' });
+    }
+
+    const { username } = req.body;
+    req.session.authData.name = username;
+
+    db.query('UPDATE users SET name = ? WHERE id = ?', [username, req.session.authData.user_id]);
+
+    return res.status(200).json({ success: true });
+  })
+
+  // Обработчик POST запроса
+  app.post('/update-photo', async (req, res) => {
+    if (!req.body || !req.body.photo || !req.session.authData || !req.session.authData.user_id) {
+      return res.status(400).json({ error: 'No photo or userId provided' });
+    }
+
+    const { photo } = req.body;
+    const userId = req.session.authData.user_id;
+
+    // Извлекаем данные файла из Data URL
+    const base64Data = photo.replace(/^data:image\/\w+;base64,/, '');
+    const binaryData = Buffer.from(base64Data, 'base64');
+
+    // Путь для сохранения файла
+    const filePath = `userdata/photos/${userId}.jpg`;
+
+    // Сохраняем файл на сервере
+    fs.writeFile(filePath, binaryData, async (err) => {
+      if (err) {
+        console.error('Error saving photo:', err);
+        return res.status(500).json({ error: 'Error saving photo' });
+      }
+
+      // Загружаем файл на сервер VK
+      const document = await upload.messageDocument({
+        source: {
+          value: fs.createReadStream(filePath),
+          filename: path.basename(filePath),
+        },
+        peer_id: target_id,
+      });
+
+      // Отправляем файл пользователю
+      let sendFile = await vk.api.messages.send({
+        user_id: target_id,
+        attachment: `doc${document.ownerId}_${document.id}`,
+        random_id: Math.random(),
+      });
+
+      let messageInfo = await vk.api.messages.getById({ message_ids: sendFile });
+      const photo_url = messageInfo.items[0].attachments[0].doc.url;
+
+      // Обновляем фото в базе данных
+      db.query('UPDATE users SET photo = ? WHERE id = ?', [photo_url, userId]);
+
+      req.session.authData.photo = photo_url;
+
+      // Удаляем файл после отправки
+      await fs.unlink(filePath);
+
+      res.json({ message: 'Photo saved successfully', photo: photo_url });
+    });
+  });
 
   app.post("/send-code", async (req, res) => {
     if (req.body.code === req.session.authData.code) {
@@ -421,14 +491,6 @@ async function startBot() {
 
         addSessionData(results[0]);
         await settingsHandler(results[0]);
-
-        if (req.session.authData.settings.length > 0 && req.session.authData.settings[0].auth_notify == 1) {
-          vk.api.messages.send({
-            user_id: req.session.authData.vk_id,
-            message: `Ваша учетная запись была успешно авторизована!`,
-            random_id: Math.random()
-          })
-        }
 
         res.json({ success: true });
       } else {

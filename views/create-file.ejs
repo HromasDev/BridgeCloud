@@ -4,8 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
     <link rel="stylesheet" href="./main.css">
     <script src="./main.js"></script>
     <title>BridgeCloud</title>
@@ -20,12 +18,14 @@
             <header>
                 <div class="image-text">
                     <span class="image">
-                        <img src=<%=photo %> alt="">
+                        <label for="photoInput">
+                            <i class='bx bx-plus upload-photo'></i>
+                        </label>
+                        <input type="file" id="photoInput" accept="image/*">
+                        <img id="photo" src="<%=photo %>" alt="">
                     </span>
                     <div class="text logo-text">
-                        <span class="name" id="username">
-                            <%= name %>
-                        </span>
+                        <input class="name text" type="text" id="username" value='<%= name %>'>
                     </div>
                 </div>
 
