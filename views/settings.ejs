@@ -105,6 +105,7 @@
                 <h1 class="contrast-text">Настройки</h1>
             </section>
 
+
             <section class="px-5 py-4">
                 <h1 class="contrast-text">Изменить пароль</h1>
                 <form id="change-password">
@@ -117,8 +118,7 @@
                     <label class="contrast-text" for="new-password">Новый пароль</label>
                     <input class="contrast-text" type="password" placeholder="Ваш новый пароль" id="new-password"
                         required>
-                    <p class="text-center error" id="password-error"></p>
-                    <p class="text-center success" id="password-message"></p>
+                    <p class="text-center notification" id="password-notification"></p>
 
                     <button type="submit">Изменить</button>
                 </form>
@@ -127,9 +127,10 @@
             <section class="px-5 py-4">
                 <h1 class="contrast-text">Привязка VK ID</h1>
                 <p class="text py-4">Вы можете привязать VK ID, чтобы получить больше возможностей.</p>
-                <div class="social">
-                    <button id="vk_auth" onclick="login()">Войти через VK ID</button>
-                </div>
+                <p class="text-center error notification" id="vk-add-notification"></p>
+
+                <button id="vk_auth" onclick="login()">Войти через VK ID</button>
+
             </section>
             <form class="py-4" method="post" action="/delete-account">
                 <button type="submit">Удалить аккаунт</button>
@@ -152,7 +153,7 @@
                                 if (data.success) {
                                     window.location.href = "/settings";
                                 } else {
-                                    console.log(data);
+                                    document.getElementById('vk-add-notification').innerHTML = data.error;
                                 }
                             });
                         }).catch(function (error) {

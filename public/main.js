@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (file) {
                 var reader = new FileReader();
                 reader.onload = function (e) {
+                    photoInput.disabled = true;
                     fetch('/update-photo', {
                         method: 'POST',
                         headers: {
@@ -38,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         const photoElement = document.getElementById('photo');
                         if (photoElement) {
                             photoElement.src = data.photo;
+                            photoInput.disabled = false;
                         }
                     }).catch(error => {
                         console.error('There was a problem with your fetch operation:', error);
@@ -56,8 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const login = document.querySelector("#login").value,
                 old_password = document.querySelector("#old-password").value,
                 new_password = document.querySelector("#new-password").value,
-                error = document.querySelector("#password-error"),
-                message = document.querySelector("#password-message");
+                notification = document.querySelector("#password-notification")
 
             fetch('/update-password', {
                 method: 'POST',
@@ -72,12 +73,14 @@ document.addEventListener('DOMContentLoaded', function () {
             }).then(response => response.json())
                 .then(data => {
                     if (data.error) {
-                        message.innerHTML = '';
-                        error.innerHTML = data.error;
+                        notification.classList.remove('success');
+                        notification.classList.add('error');
+                        notification.innerHTML = data.error;
                     }
                     if (data.message) {
-                        error.innerHTML = '';
-                        message.innerHTML = data.message;
+                        notification.classList.remove('error');
+                        notification.classList.add('success');
+                        notification.innerHTML = data.message;
                     }
                 });
         });

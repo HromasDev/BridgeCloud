@@ -98,7 +98,7 @@
 
         <div class="workspace settings">
             <section class="px-5 py-4">
-                <h1 class="contrast-text">Админ-панель</h1>
+                <h2 class="contrast-text">Админ-панель</h2>
             </section>
 
             <section class="px-5 py-4">
@@ -117,9 +117,33 @@
                     </tbody>
                 </table>
             </section>
+
+            <div class="workspace settings">
+                <h1 class="contrast-text py-4">Логи</h1>
+                <section class="px-5 py-3">
+                    <input type="text" id="search_bar" class="contrast-text" onkeyup="search_id()"
+                        placeholder="Поиск по ID.." title="Введите имя">
+
+                    <table class="logs-list contrast-text">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th class="text-left">Действие</th>
+                                <th class="text-left w-50">Результат</th>
+                                <th class="sortable" onclick="date_sort()">Дата<i class='bx bx-sort-up icon'></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
         </div>
 
+
+
         <script>
+            let logs = [];
             const userslist = document.querySelector('.users-list tbody');
             fetch('/get-users', {
                 method: 'POST',
@@ -151,9 +175,75 @@
                     });
                 })
                 .catch(error => console.error(error));
-        </script>
 
+            const logslist = document.querySelector('.logs-list tbody');
+            fetch('/get-logs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({}),
+            }).then(response => response.json())
+                .then(data => {
+                    logs = data;
+                    currentLogs = logs;
+                    date_sort();
+                })
+        </script>
         <script>
+            let currentLogs = [];
+            let initialAscendingOrder = false;
+            let ascendingOrder = initialAscendingOrder;
+            date_sort();
+
+            function date_sort() {
+                ascendingOrder = !ascendingOrder;
+                sortAndDisplay();
+            }
+
+            function search_id() {
+                const filter = document.getElementById("search_bar").value;
+                currentLogs = filter ? logs.filter(log => log.user_id == filter) : logs.slice();
+                sortAndDisplay();
+            }
+
+            function sortAndDisplay() {
+                currentLogs.sort((a, b) => {
+                    const dateA = new Date(a.date);
+                    const dateB = new Date(b.date);
+                    return ascendingOrder ? dateA - dateB : dateB - dateA;
+                });
+
+                displayLogs();
+            }
+
+            function displayLogs() {
+                logslist.innerHTML = '';
+                currentLogs.forEach(log => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                    <td>${log.user_id}</td>
+                    <td class="text-left">${log.activity}</td>
+                    <td class="text-left">
+                        <div class="marquee">
+                            <span>${typeof log.result === 'object' ?
+                                    log.activity == "Пользователь изменил фото" ?
+                                        log.result.last ? `<a href="${log.result.last}">старое</a> → <a href="${log.result.new}">новое</a>` :
+                                            `<a href="${log.result.new}">новое</a>` :
+                                        log.result.last ? log.result.last + " → " + log.result.new : log.result.new :
+                                    log.result}</span>
+                        </div>               
+                    </td>
+                    <td>${log.date}</td>
+                `;
+                    logslist.appendChild(tr);
+                });
+
+                const sortIcon = document.querySelector('.sortable .icon');
+                sortIcon.classList.toggle('bx-sort-down', ascendingOrder);
+                sortIcon.classList.toggle('bx-sort-up', !ascendingOrder);
+            }
+
             function deleteUser(id, button) {
                 fetch('/delete-user', {
                     method: 'POST',

@@ -24,15 +24,13 @@
       <input class="contrast-text" type="text" placeholder="Ваш логин" id="login" name="login" required>
       <label class="contrast-text" for="password">Пароль</label>
       <input class="contrast-text" type="password" placeholder="Ваш пароль" id="password" name="password" required>
-      <p class="error" id="error"></p>
+      <p class="notification error" id="error"></p>
 
       <button type="submit">Войти</button>
       <a class="contrast-text" href="/register">Создать новую учетную запись</a>
     </form>
 
-    <div class="social">
-      <button id="vk_auth" onclick="login()">Войти через VK ID</button>
-    </div>
+    <button id="vk_auth" onclick="login()">Войти через VK ID</button>
   </div>
 
   <script type="text/javascript">

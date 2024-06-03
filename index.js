@@ -6,13 +6,12 @@ const { VK } = require("vk-io");
 const { Upload } = require("vk-io");
 const path = require("path");
 const chokidar = require("chokidar");
-const rimraf = require("rimraf");
 var multer = require("multer");
 const async = require("async");
 var mysql = require('mysql');
 const generatePassword = require("password-generator");
-const { toUpper, update } = require("lodash");
 const bodyParser = require('body-parser');
+const useragent = require('useragent');
 
 var db = mysql.createConnection({
   host: process.env.HOST,
@@ -261,6 +260,7 @@ async function startBot() {
     req.session.authData.name = username;
 
     db.query('UPDATE users SET name = ? WHERE id = ?', [username, req.session.authData.user_id]);
+    db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [req.session.authData.user_id, 'Пользователь изменил имя', username]);
 
     return res.status(200).json({ success: true });
   })
@@ -309,6 +309,7 @@ async function startBot() {
 
       // Обновляем фото в базе данных
       db.query('UPDATE users SET photo = ? WHERE id = ?', [photo_url, userId]);
+      db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [userId, 'Пользователь изменил фото', photo_url]);
 
       req.session.authData.photo = photo_url;
 
@@ -319,16 +320,45 @@ async function startBot() {
     });
   });
 
+  const sendAuthNotification = async (vk_id, userId, sourceIp, sourseAgent) => {
+    const resultAgent = await new Promise((resolve, reject) => {
+      db.query('SELECT result FROM `logs` WHERE user_id = ? AND activity = "Пользователь авторизовался" ORDER BY id DESC LIMIT 1', [userId], (err, results) => {
+        if (err) reject(err);
+        else resolve(results[0]?.result);
+      });
+    });
+
+    if (resultAgent == sourseAgent) return;
+    else {
+      const agent = useragent.parse(sourseAgent);
+      const os = agent.os.toString();
+      const browser = agent.toAgent();
+      const userAgent = `${os}, ${browser}`
+
+      vk.api.messages.send({
+        user_id: vk_id,
+        message: `
+        Ваша учетная запись авторизована с нового устройства.
+
+        Если вы этого не делали:
+        1.	Войдите в аккаунт.
+        2.	Измените пароль, чтобы обезопасить аккаунт.
+
+        Устройство: ${userAgent}\n IP: ${sourceIp}`,
+        random_id: Math.random()
+      });
+    };
+  }
+
   app.post("/send-code", async (req, res) => {
+    const userAgent = req.headers['user-agent'];
+    const ipAddress = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0] : req.connection.remoteAddress;
+
     if (req.body.code === req.session.authData.code) {
       req.session.authData.accepted = true;
 
       if (req.session.authData.settings[0].auth_notify == 1) {
-        vk.api.messages.send({
-          user_id: req.session.authData.vk_id,
-          message: `Ваша учетная запись была успешно авторизована!`,
-          random_id: Math.random()
-        })
+        await sendAuthNotification(req.session.authData.vk_id, req.session.authData.user_id, ipAddress, userAgent);
       }
       res.json({ success: true });
     } else {
@@ -337,6 +367,7 @@ async function startBot() {
   })
 
   app.post("/vk-auth", async (req, res) => {
+    const userAgent = req.headers['user-agent'];
 
     const getSettings = async () => {
       return new Promise((resolve, reject) => {
@@ -366,7 +397,7 @@ async function startBot() {
       const settings = await getSettings();
       if (settings.length > 0) {
         if (settings[0]['2fa'] === 1) {
-          const code = toUpper(generatePassword(6, false))
+          const code = generatePassword(6, false).toUpperCase();
 
           vk.api.messages.send({
             user_id: data.vk_id,
@@ -399,6 +430,8 @@ async function startBot() {
     if (results.length > 0) {
       addSessionData(results[0]);
       settingsHandler(results[0]);
+
+      db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [results[0].id, 'Пользователь авторизовался', userAgent]);
     }
 
     else {
@@ -427,6 +460,9 @@ async function startBot() {
 
       console.log(`Пользователь ${results[0].id} успешно зарегистрирован по VK ID.`);
 
+      const userAgent = req.headers['user-agent'];
+      db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [results[0].id, 'Пользователь зарегистрировался', userAgent]);
+
       addSessionData(results[0]);
       settingsHandler(results[0]);
     }
@@ -435,6 +471,9 @@ async function startBot() {
 
   app.post("/auth", async (req, res) => {
     try {
+      const userAgent = req.headers['user-agent'];
+      const ipAddress = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0] : req.connection.remoteAddress;
+
       const getSettings = async () => {
         return new Promise((resolve, reject) => {
           db.query('SELECT * FROM user_settings WHERE user_id = ?', [req.session.authData.user_id], function (error, results) {
@@ -464,7 +503,7 @@ async function startBot() {
         req.session.authData.vk_id = data.vk_id;
         if (settings.length > 0) {
           if (settings[0]['2fa'] === 1) {
-            const code = toUpper(generatePassword(6, false))
+            const code = generatePassword(6, false).toUpperCase();
 
             vk.api.messages.send({
               user_id: data.vk_id,
@@ -473,6 +512,9 @@ async function startBot() {
             })
 
             req.session.authData.code = code
+          } else if (settings[0]['auth_notify'] === 1) {
+            sendAuthNotification(req.session.authData.vk_id, req.session.authData.user_id, ipAddress, userAgent);
+            req.session.authData.accepted = true;
           } else {
             req.session.authData.accepted = true;
           }
@@ -491,6 +533,7 @@ async function startBot() {
 
         addSessionData(results[0]);
         await settingsHandler(results[0]);
+        db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [results[0].id, 'Пользователь авторизовался', userAgent]);
 
         res.json({ success: true });
       } else {
@@ -548,6 +591,8 @@ async function startBot() {
     const name = req.body.first_name + ' ' + req.body.last_name;
 
     db.query('UPDATE users SET vk_id = ?, photo = ?, name = ? WHERE id = ?', [req.body.id, info[0].photo_100, name, data.user_id]);
+    db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [data.user_id, 'Пользователь привязал VK ID', req.body.id]);
+
     req.session.authData.name = name;
     req.session.authData.vk_id = req.body.id;
     req.session.authData.photo = info[0].photo_100;
@@ -575,6 +620,12 @@ async function startBot() {
           });
         });
         console.log(`Пользователь успешно зарегистрирован.`);
+
+        const userAgent = req.headers['user-agent'];
+        db.query(
+          `INSERT INTO logs (user_id, activity, result)
+          SELECT id, ?, ? FROM users WHERE login = ?;`,
+          ['Пользователь зарегистрировался', userAgent, req.body.login]);
         res.json({ success: true });
       }
 
@@ -617,6 +668,75 @@ async function startBot() {
       }
 
       res.json(users);
+    }
+  });
+
+  app.post("/get-logs", async (req, res) => {
+    const data = req.session.authData;
+    if (data && data.isAdmin) {
+      const logs = await new Promise((resolve, reject) => {
+        db.query('SELECT * FROM logs', function (error, results) {
+          if (error) reject(error);
+          else resolve(results);
+        });
+      });
+
+      if (logs.length > 0) {
+        let formattedLogs = await Promise.all(logs.map(async log => {
+          const formattedDate = new Intl.DateTimeFormat('ru-RU', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+          }).format(new Date(log.date));
+
+          let new_value = "";
+          let last_value = "";
+
+          if (log.activity === "Пользователь изменил имя") {
+            const lastName_q = await new Promise((resolve, reject) => {
+              db.query(`SELECT result FROM logs WHERE user_id = ${log.user_id} AND activity = "Пользователь изменил имя" AND id < ${log.id} ORDER BY id DESC LIMIT 1`, function (error, results) {
+                if (error) reject(error);
+                else resolve(results);
+              });
+            });
+
+            if (lastName_q.length > 0) {
+              last_value = lastName_q[0].result;
+            }
+
+            new_value = log.result;
+          }
+          else if (log.activity === "Пользователь изменил фото") {
+            const lastPhoto_q = await new Promise((resolve, reject) => {
+              db.query(`SELECT result FROM logs WHERE user_id = ${log.user_id} AND activity = "Пользователь изменил фото" AND id < ${log.id} ORDER BY id DESC LIMIT 1`, function (error, results) {
+                if (error) reject(error);
+                else resolve(results);
+              });
+            });
+
+            if (lastPhoto_q.length > 0) {
+              last_value = lastPhoto_q[0].result;
+            }
+
+            new_value = log.result;
+          }
+
+          return {
+            ...log,
+            date: formattedDate,
+            result: log.activity === "Пользователь изменил имя" || log.activity === "Пользователь изменил фото" ? { last: last_value, new: new_value } : log.result,
+          };
+        }));
+
+        res.json(formattedLogs);
+      }
+
+
+
     }
   });
 
@@ -719,7 +839,6 @@ async function startBot() {
 
   app.get("/settings", async (req, res) => {
     const data = req.session.authData;
-    console.log(data)
 
     if (data && data.accepted) {
       if (data.verified === 1) {
@@ -802,9 +921,8 @@ async function startBot() {
     req.session.files = {};
     const authData = req.session.authData;
     let save_path = req.body.dir.slice(6);
-    console.log(req.body.dir)
-    if (authData) {
 
+    if (authData) {
       var watcher = chokidar.watch("userdata/uploads/" + authData.user_id, {
         ignored: /^\./,
         persistent: true,
@@ -915,6 +1033,7 @@ async function startBot() {
           console.error("Ошибка при сохранении файла в базу данных:", error);
           return;
         }
+        db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [user_id, "Пользователь отправил файл", conversation_id]);
 
         console.log(`Информация о файле ${file_path} успешно сохранена в базу данных!`);
       });
@@ -941,9 +1060,6 @@ async function startBot() {
 
   app.post("/delete-account", async (req, res) => {
     db.query('DELETE FROM users WHERE id = ?', [req.session.authData.user_id]);
-    db.query('DELETE FROM files WHERE user_id = ?', [req.session.authData.user_id]);
-    db.query('DELETE FROM user_settings WHERE user_id = ?', [req.session.authData.user_id]);
-
     res.redirect('/logout');
   })
 
@@ -953,9 +1069,6 @@ async function startBot() {
       const { id } = req.body;
 
       db.query('DELETE FROM users WHERE id = ?', [id]);
-      db.query('DELETE FROM files WHERE user_id = ?', [id]);
-      db.query('DELETE FROM user_settings WHERE user_id = ?', [id]);
-
       res.status(200).json({ success: true, message: 'User deleted successfully' });
     } else {
       res.status(403).json({ success: false, error: 'Unauthorized' });
@@ -977,6 +1090,7 @@ async function startBot() {
           console.error("Ошибка при удалении файла из базы данных:", error);
           return;
         }
+        db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [user_id, "Пользователь удалил файл", message_ids]);
 
         console.log(`Сообщение ${message_ids} успешно удалено!`);
       });
@@ -990,6 +1104,7 @@ async function startBot() {
       db.query('DELETE FROM files WHERE file_id = ? AND user_id = ?', [message_ids, user_id], function (error, results) {
         if (error) {
           console.error("Ошибка при удалении файла из базы данных:", error);
+          db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [user_id, "Пользователь удалил файл", message_ids]);
           return;
         }
         console.log(`Сообщение ${message_ids} было загружено позже лимита, успешно удалено только у бота.`);
