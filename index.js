@@ -12,6 +12,7 @@ var mysql = require('mysql');
 const generatePassword = require("password-generator");
 const bodyParser = require('body-parser');
 const useragent = require('useragent');
+require('dotenv').config();
 
 var db = mysql.createConnection({
   host: process.env.HOST,
@@ -163,8 +164,8 @@ app.use(express.urlencoded({ extended: true }));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-app.listen(80, () => {
-  console.log("Сервер Express запущен на порту 80");
+app.listen(3000, () => {
+  console.log("Сервер Express запущен на порту 3000");
   startBot();
 });
 
@@ -281,42 +282,54 @@ async function startBot() {
     // Путь для сохранения файла
     const filePath = `userdata/photos/${userId}.jpg`;
 
-    // Сохраняем файл на сервере
-    fs.writeFile(filePath, binaryData, async (err) => {
-      if (err) {
-        console.error('Error saving photo:', err);
-        return res.status(500).json({ error: 'Error saving photo' });
+    const photosDir = path.dirname(filePath);
+    fs.mkdir(photosDir, { recursive: true }, (err) => {
+      if (err && err.code !== 'EEXIST') {
+        console.error('Error creating photos directory:', err);
+        return res.status(500).json({ error: 'Error creating photos directory' });
       }
 
-      // Загружаем файл на сервер VK
-      const document = await upload.messageDocument({
-        source: {
-          value: fs.createReadStream(filePath),
-          filename: path.basename(filePath),
-        },
-        peer_id: target_id,
+      // Сохраняем файл на сервере
+      fs.writeFile(filePath, binaryData, async (err) => {
+        if (err) {
+          console.error('Error saving photo:', err);
+          return res.status(500).json({ error: 'Error saving photo' });
+        }
+
+        // Загружаем файл на сервер VK
+        const document = await upload.messageDocument({
+          source: {
+            value: fs.createReadStream(filePath),
+            filename: path.basename(filePath),
+          },
+          peer_id: target_id,
+        });
+
+        // Отправляем файл пользователю
+        let sendFile = await vk.api.messages.send({
+          user_id: target_id,
+          attachment: `doc${document.ownerId}_${document.id}`,
+          random_id: Math.random(),
+        });
+
+        let messageInfo = await vk.api.messages.getById({ message_ids: sendFile });
+        const photo_url = messageInfo.items[0].attachments[0].doc.url;
+
+        // Обновляем фото в базе данных
+        db.query('UPDATE users SET photo = ? WHERE id = ?', [photo_url, userId]);
+        db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [userId, 'Пользователь изменил фото', photo_url]);
+
+        req.session.authData.photo = photo_url;
+
+        // Удаляем файл после отправки
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error('Error deleting photo file:', err);
+          }
+        });
+
+        res.json({ message: 'Photo saved successfully', photo: photo_url });
       });
-
-      // Отправляем файл пользователю
-      let sendFile = await vk.api.messages.send({
-        user_id: target_id,
-        attachment: `doc${document.ownerId}_${document.id}`,
-        random_id: Math.random(),
-      });
-
-      let messageInfo = await vk.api.messages.getById({ message_ids: sendFile });
-      const photo_url = messageInfo.items[0].attachments[0].doc.url;
-
-      // Обновляем фото в базе данных
-      db.query('UPDATE users SET photo = ? WHERE id = ?', [photo_url, userId]);
-      db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [userId, 'Пользователь изменил фото', photo_url]);
-
-      req.session.authData.photo = photo_url;
-
-      // Удаляем файл после отправки
-      await fs.unlink(filePath);
-
-      res.json({ message: 'Photo saved successfully', photo: photo_url });
     });
   });
 
@@ -359,19 +372,23 @@ async function startBot() {
 
       if (req.session.authData.settings[0].auth_notify == 1) {
         await sendAuthNotification(req.session.authData.vk_id, req.session.authData.user_id, ipAddress, userAgent);
+        req.session.authData.accepted = true;
       }
+      db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [req.session.authData.user_id, 'Пользователь авторизовался', userAgent]);
+
       res.json({ success: true });
     } else {
       res.json({ error: "Неверный код" });
     }
   })
 
-  app.post("/vk-auth", async (req, res) => {
+app.post("/vk-auth", async (req, res) => {
     const userAgent = req.headers['user-agent'];
+    const ipAddress = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0] : req.connection.remoteAddress;
 
     const getSettings = async () => {
       return new Promise((resolve, reject) => {
-        db.query('SELECT * FROM user_settings WHERE id = ?', [req.session.authData.user_id], function (error, results) {
+        db.query('SELECT * FROM user_settings WHERE user_id = ?', [req.session.authData.user_id], function (error, results) {
           if (error) {
             reject(error);
           } else {
@@ -381,7 +398,7 @@ async function startBot() {
       });
     }
 
-    const addSessionData = (data) => {
+    const addSessionData = async (data) => {
       req.session.authData = {
         user_id: data.id,
         vk_id: data.vk_id,
@@ -390,31 +407,8 @@ async function startBot() {
         photo: data.photo,
         verified: data.verified,
         isAdmin: data.isAdmin,
+        accepted: true
       };
-    }
-
-    const settingsHandler = async (data) => {
-      const settings = await getSettings();
-      if (settings.length > 0) {
-        if (settings[0]['2fa'] === 1) {
-          const code = generatePassword(6, false).toUpperCase();
-
-          vk.api.messages.send({
-            user_id: data.vk_id,
-            message: `Ваш код 2FA: ${code}\n\nПожалуйста, введите его в приложении.`,
-            random_id: Math.random()
-          })
-
-          req.session.authData.code = code
-          req.session.authData.vk_id = data.vk_id;
-          req.session.authData.settings = settings;
-        } else {
-          req.session.authData.accepted = true;
-        }
-      } else {
-        req.session.authData.accepted = true;
-      }
-      res.redirect('/')
     }
 
     req.body.login = generatePassword(24, false);
@@ -428,9 +422,16 @@ async function startBot() {
     });
 
     if (results.length > 0) {
-      addSessionData(results[0]);
-      settingsHandler(results[0]);
+      await addSessionData(results[0]);
 
+      const settings = await getSettings();
+      console.log(settings)
+      if (settings.length > 0) {
+        if (settings[0].auth_notify == 1) {
+          await sendAuthNotification(results[0].vk_id, results[0].id, ipAddress, userAgent);
+        }
+        req.session.authData.settings = settings;
+      }
       db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [results[0].id, 'Пользователь авторизовался', userAgent]);
     }
 
@@ -462,10 +463,10 @@ async function startBot() {
 
       const userAgent = req.headers['user-agent'];
       db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [results[0].id, 'Пользователь зарегистрировался', userAgent]);
-
       addSessionData(results[0]);
-      settingsHandler(results[0]);
+      req.session.authData.settings = await getSettings();
     }
+    res.redirect('/')
 
   })
 
@@ -512,13 +513,15 @@ async function startBot() {
             })
 
             req.session.authData.code = code
-          } else if (settings[0]['auth_notify'] === 1) {
-            sendAuthNotification(req.session.authData.vk_id, req.session.authData.user_id, ipAddress, userAgent);
-            req.session.authData.accepted = true;
           } else {
+            if (settings[0].auth_notify == 1) {
+              await sendAuthNotification(data.vk_id, data.id, ipAddress, userAgent);
+            }
+            db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [results[0].id, 'Пользователь авторизовался', userAgent]);
             req.session.authData.accepted = true;
           }
         } else {
+          db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [results[0].id, 'Пользователь авторизовался', userAgent]);
           req.session.authData.accepted = true;
         }
       }
@@ -533,7 +536,6 @@ async function startBot() {
 
         addSessionData(results[0]);
         await settingsHandler(results[0]);
-        db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [results[0].id, 'Пользователь авторизовался', userAgent]);
 
         res.json({ success: true });
       } else {
@@ -734,9 +736,6 @@ async function startBot() {
 
         res.json(formattedLogs);
       }
-
-
-
     }
   });
 
@@ -970,21 +969,20 @@ async function startBot() {
         const sessionsFile = `./userdata/sessions/${id}.json`;
         const unloadsFile = `./userdata/unloads/${id}.json`;
 
-        if (!fs.existsSync(uploadsDir)) {
-          fs.mkdirSync(uploadsDir, { recursive: true });
-        } else {
-          fs.removeSync(uploadsDir);
-        }
-        if (!fs.existsSync(sessionsFile)) {
-          fs.writeFileSync(sessionsFile, JSON.stringify({ ...id, token }, null, 2));
-        } else {
-          fs.writeFileSync(sessionsFile, JSON.stringify({ ...id, token }, null, 2), { flag: 'w' });
-        }
-        if (!fs.existsSync(unloadsFile)) {
-          await saveFiles(id, false, unloadsFile);
-        } else {
-          fs.unlinkSync(unloadsFile);
+        try {
+          // Создаем директорию, если она не существует
+          await fs.mkdir(path.dirname(uploadsDir), { recursive: true });
+
+          // Пишем/перезаписываем файл
+          await fs.writeFile(sessionsFile, JSON.stringify({ ...id, token }, null, 2));
+
+          // Пишем/перезаписываем файл, удаляем старый файл, если он существует
+          await fs.unlink(unloadsFile).catch(err => {
+            if (err.code !== 'ENOENT') throw err; // Пропускаем ошибку, если файл не существует
+          });
           await saveFiles(id, true, unloadsFile);
+        } catch (error) {
+          console.error('Ошибка при создании директории и записи файла:', error);
         }
       }
       await createDirectories();
@@ -1104,9 +1102,10 @@ async function startBot() {
       db.query('DELETE FROM files WHERE file_id = ? AND user_id = ?', [message_ids, user_id], function (error, results) {
         if (error) {
           console.error("Ошибка при удалении файла из базы данных:", error);
-          db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [user_id, "Пользователь удалил файл", message_ids]);
           return;
         }
+        db.query('INSERT INTO logs (user_id, activity, result) VALUES (?, ?, ?)', [user_id, "Пользователь удалил файл", message_ids]);
+
         console.log(`Сообщение ${message_ids} было загружено позже лимита, успешно удалено только у бота.`);
       });
     }
@@ -1159,11 +1158,3 @@ async function startBot() {
   });
   vk.updates.start().catch(console.error);
 }
-
-/* 
-Вот некоторые вещи, которые, как я вижу, можно было бы улучшить в этом коде:
-
-1. Дублирующийся код - существует дублирующийся код для просмотра каталогов на предмет изменений файлов. Это может быть извлечено в функцию повторного использования.
-2. Сообщения об ошибках могли бы предоставить больше контекста. Вместо того чтобы просто регистрировать ошибку, в сообщениях должно указываться, где произошла ошибка.
-
-*/
