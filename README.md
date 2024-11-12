@@ -18,9 +18,9 @@
 <details>
   <summary>Содержание</summary>
   <ol>
-    <li><a href="#about-the-project">О проекте</a></li>
-    <li><a href="#built-with">Используемые технологии</a></li>
-    <li><a href="#roadmap">Дорожная карта</a></li>
+    <li><a href="#о-проекте">О проекте</a></li>
+    <li><a href="#используемые-технологии">Используемые технологии</a></li>
+    <li><a href="#дорожная-карта">Дорожная карта</a></li>
   </ol>
 </details>
 
