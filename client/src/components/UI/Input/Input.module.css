@@ -1,0 +1,21 @@
+.Input {
+    height: 50px;
+    width: 100%;
+    border-radius: var(--border-radius);
+    border: none;
+    outline: none;
+    padding: 0 10px;
+    margin: 8px 0 20px;
+    border: 2px solid transparent;
+    background-color: var(--item-color);
+}
+
+.Input:hover {
+    transition: var(--transition-delay) ease;
+    border: 2px solid var(--primary-color);
+}
+
+.Input:focus {
+    transition: none;
+    border: 3px solid var(--primary-color);
+}

@@ -1,0 +1,30 @@
+.Button {
+    height: 50px;
+    width: 100%;
+    border-radius: var(--border-radius);
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 0 10px;
+    margin-top: 8px;
+    transition: var(--transition-delay) ease;
+}
+
+.primary {
+    background-color: transparent;
+    color: var(--primary-color);
+}
+
+.secondary {
+    background: transparent;
+    color: var(--text-color);
+}
+
+.secondary:hover {
+    background:var(--item-hover);
+    color: var(--text-color);
+}
+
+.primary:hover {
+    background: var(--item-hover);
+}

@@ -1,0 +1,55 @@
+.ModalWrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Darker overlay for better contrast */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+}
+
+.ModalHeader {
+    text-align: center;
+    padding: 0 0 20px 0;
+}
+
+.Modal {
+    padding: 30px; /* Increased padding for a spacious feel */
+    max-width: 400px; /* Limit width for better readability */
+    width: 90%; /* Responsive width */
+    animation: fadeIn 0.3s ease; /* Fade-in animation */
+    border-radius: var(--border-radius);
+    background-color: var(--background-color);
+}
+
+.closeButton {
+    position: absolute;
+    top: 15px; /* Adjusted for better alignment */
+    right: 15px; /* Adjusted for better alignment */
+    cursor: pointer;
+    background-color: transparent; /* Transparent background */
+    border: none; /* No border */
+    font-size: 18px; /* Larger font size for visibility */
+    color: #ff4d4d; /* Red color for emphasis */
+    transition: color 0.3s ease; /* Smooth color transition */
+}
+
+
+.closeButton:hover {
+    color: #ff1a1a; /* Darker red on hover */
+}
+
+/* Animation keyframes for fade-in effect */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px); /* Slight upward movement on entry */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

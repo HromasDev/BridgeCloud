@@ -1,0 +1,19 @@
+
+.PageLoader {
+    width: 100vw;
+    height: 100vh; /* Занимает всю высоту экрана */
+    position: relative;
+    overflow: hidden; /* Скрываем лишнее */
+    background: linear-gradient(90deg, var(--background-color) 25%, var(--item-color) 50%, var(--background-color) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}

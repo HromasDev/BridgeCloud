@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* default theme */
+    --background-color: rgb(240, 240, 240);
+    --primary-color: rgb(45, 170, 255);
+    --text-color: rgb(50, 50, 50);
+    --item-color: rgb(255, 255, 255);
+    --item-hover: rgba(160, 160, 160, 0.1);
+
+    /* border */
+    --border-radius: 15px;
+
+    /* transition */
+    --transition-delay: 0.2s;
+
+    /* contexify */
+    --contexify-activeItem-color: var(--primary-color) !important;
+    --contexify-activeItem-bgColor: var(--item-hover) !important;
+    --contexify-menu-bgColor: rgb(250, 250, 250) !important;
+    --contexify-menu-radius: var(--border-radius) !important;
+
+    --contexify-activeItem-radius: calc(var(--border-radius) - (var(--border-radius) / 2)) !important;
+
+    /* colors */
+    --red: rgb(255, 100, 100);
+    --green: rgb(100, 255, 160);
+    --gray: #707070;
+}
+
+
+.dark-theme {
+    --background-color: rgb(33, 33, 33);
+    --text-color: rgb(240, 240, 240);
+    --item-color: rgb(50, 50, 50);
+
+    /* contexify */
+    --contexify-item-color: var(--text-color) !important;
+    --contexify-activeItem-color: var(--primary-color) !important;
+    --contexify-activeItem-bgColor: var(--item-hover) !important;
+    --contexify-menu-bgColor: rgb(45, 45, 45) !important;
+}
+
+body {
+    font-family: "Rubik", sans-serif;
+    font-optical-sizing: auto;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    user-select: none;
+}
+
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+    color: var(--text-color);
+}
+
+.subtitle {
+    color: var(--gray)
+}
+
+img {
+    pointer-events: none;
+}
+
+.textCenter {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+}
+
+.error {
+    color: var(--red);
+}
+
+.success {
+    color: var(--green);
+}
+
+.content {
+    margin-left: 250px;
+    height: 100vh;
+    padding: 20px;
+}
+
+.title {
+    padding: 10px 0;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: var(--background-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--item-color);
+}
+
+hr {
+    border: var(--item-color) 1px solid;
+    margin: 10px 0;
+}

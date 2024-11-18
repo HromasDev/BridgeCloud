@@ -1,0 +1,39 @@
+.DropzoneWrapper {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    margin: 15px 0;
+    padding: 90px 0;
+}
+
+.Dropzone {
+    outline: none;
+    border: 2px dashed transparent;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    transition: var(--transition-delay);
+}
+
+
+.Dropzone p {
+    margin: 0;
+    font-size: 16px;
+    color: var(--text-color);
+}
+
+.Dropzone.active {
+    border-color: var(--item-hover);
+}
+
+.text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+}

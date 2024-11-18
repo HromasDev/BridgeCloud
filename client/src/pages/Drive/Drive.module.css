@@ -1,0 +1,62 @@
+.progressWrapper {
+    width: 400px;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    background-color: var(--item-color);
+    border-radius: var(--border-radius);
+    transition: 0.1s ease;
+}
+
+.progressFile {
+    position: relative;
+    margin: 10px;
+    padding: 5px;
+    text-align: center;
+    border-radius: calc(var(--border-radius) - (var(--border-radius) / 2));
+    background-color: var(--background-color);
+    overflow: hidden;
+}
+
+.progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 50%;
+    background-color: var(--primary-color);
+    border-radius: inherit;
+    transition: 0.3s ease;
+    z-index: 1;
+}
+
+.progressFile span {
+    position: relative;
+    z-index: 2;
+    color: var(--text-primary);
+}
+
+.pathSlash {
+    padding: 0 20px;
+}
+
+.pathSection {
+    display: inline;
+    font-weight: bold;
+}
+
+.pathFolder {
+    font-size: 24px;
+    padding: 10px;
+    margin: -10px;
+    transition: var(--transition-delay) ease;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+}
+
+.pathFolder:hover {
+    text-decoration: underline;
+    background-color: var(--item-hover);
+    color: var(--primary-color);
+}
