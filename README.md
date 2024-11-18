@@ -1,7 +1,7 @@
 <br />
 <a id="readme-top"></a>
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/3f218ed1-9a83-4631-a7e8-0ee382aa4ef9" alt="logo" width="300">
+  <img src="https://github.com/user-attachments/assets/81a74272-f383-4c3d-985b-43c4ab7a4f73" alt="logo" width="300">
 
   <h1 align="center">BridgeCloud - Облачное хранилище</h1>
 
