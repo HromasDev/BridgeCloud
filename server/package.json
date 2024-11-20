@@ -1,14 +1,11 @@
 {
   "name": "bridge",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js"
   },
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "config": "^3.3.12",

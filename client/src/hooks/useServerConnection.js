@@ -1,28 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 const apiUrl = import.meta.env.VITE_API_URL
 
 const useServerConnection = () => {
-    const [isServerConnected, setIsServerConnected] = useState(null);
+	const [isServerConnected, setIsServerConnected] = useState(null)
 
-    useEffect(() => {
-        const checkServerConnection = async () => {
-            try {
-                const response = await fetch(`${apiUrl}/status`);
-                if (response.ok) {
-                    setIsServerConnected(true);
-                } else {
-                    setIsServerConnected(false);
-                    callback("Сервер недоступен");
-                }
-            } catch (error) {
-                setIsServerConnected(false);
-            }
-        };
+	useEffect(() => {
+		const checkServerConnection = async () => {
+			try {
+				const response = await fetch(`${apiUrl}/status`)
+				if (response.ok) {
+					setIsServerConnected(true)
+				} else {
+					setIsServerConnected(false)
+				}
+			} catch (error) {
+				setIsServerConnected(false)
+			}
+		}
 
-        checkServerConnection();
-    }, []);
+		checkServerConnection()
+	}, [])
 
-    return isServerConnected;
-};
+	return isServerConnected
+}
 
-export default useServerConnection;
+export default useServerConnection
