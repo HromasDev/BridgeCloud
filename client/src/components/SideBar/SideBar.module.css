@@ -1,168 +1,233 @@
 .SideBar {
-    height: 100%;
-    position: fixed;
-    width: 250px;
-    z-index: 9;
-    padding: 10px 14px;
-    background: var(--item-color);
-    display: flex;
-    flex-direction: column;
+	height: 100%;
+	position: fixed;
+	width: 250px;
+	z-index: 9;
+	padding: 10px 14px;
+	background: var(--item-color);
+	display: flex;
+	flex-direction: column;
+	transition: all 0.3s ease;
 }
 
 .topContent {
-    height: 60px;
-    display: flex;
-    align-items: center;
-    margin: 0px 5px 10px 5px;
+	height: 60px;
+	display: flex;
+	align-items: center;
+	margin: 0px 5px 10px 5px;
 }
 
 .user_photo {
-    width: 45px;
+	width: 45px;
+	border-radius: 50%;
+	object-fit: cover;
 }
 
 .user_info {
-    margin-left: 10px;
-    display: flex;
-    flex-direction: column;
-    max-width: 150px;
+	margin-left: 10px;
+	display: flex;
+	flex-direction: column;
+	max-width: 150px;
 }
 
 .user_name {
-    margin: 0px 0px 4px 4px;
-    font-size: 18px;
+	margin: 0px 0px 4px 4px;
+	font-size: 18px;
 }
 
 .user_role {
-    padding: 4px 10px;
-    width: fit-content;
-    border-radius: var(--border-radius);
-    background-color: var(--item-hover);
-    font-weight: 500;
-    color: var(--primary-color);
-    font-size: 12px;
+	padding: 4px 10px;
+	width: fit-content;
+	border-radius: var(--border-radius);
+	background-color: var(--item-hover);
+	font-weight: 500;
+	color: var(--primary-color);
+	font-size: 12px;
 }
 
 .menu {
-    display: flex;
-    flex-direction: column;
+	display: flex;
+	flex-direction: column;
 }
 
 a,
 .themeTogglerButton {
-    height: 50px;
-    border-radius: var(--border-radius);
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    color: var(--text-color);
-    transition: background var(--transition-delay);
+	height: 50px;
+	border-radius: var(--border-radius);
+	display: flex;
+	align-items: center;
+	text-decoration: none;
+	color: var(--text-color);
+	transition: background var(--transition-delay);
 }
 
 .themeTogglerButton {
-    color: var(--primary-color);
-    background: var(--item-hover);
-    cursor: pointer;
+	color: var(--primary-color);
+	background: var(--item-hover);
+	cursor: pointer;
 }
 
-a:hover {
-    color: var(--primary-color);
-    background: var(--item-hover);
+a:hover,
+a:active {
+	color: var(--primary-color);
+	background: var(--item-hover);
 }
 
 .bottomContent {
-    margin-top: auto;
+	margin-top: auto;
 }
 
 .toggleSwitch {
-    width: 50px;
-    height: 24px;
-    background-color: #ccc;
-    border-radius: 50px;
-    position: relative;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-left: 10px;
+	width: 50px;
+	height: 24px;
+	background-color: #ccc;
+	border-radius: 50px;
+	position: relative;
+	cursor: pointer;
+	transition: background-color 0.3s;
+	margin-left: 10px;
 }
 
 .switch {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 20px;
-    height: 20px;
-    background-color: white;
-    border-radius: 50%;
-    transition: transform 0.3s;
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 20px;
+	height: 20px;
+	background-color: white;
+	border-radius: 50%;
+	transition: transform 0.3s;
 }
 
 .icon {
-    margin: 0 15px;
+	margin: 0 15px;
 }
 
 .modeText {
-    width: 105px; /* Задайте ширину, достаточную для текста */
-    text-align: center; /* Центрируйте текст */
+	width: 105px;
+	text-align: center;
 }
 
-
 .switch.active {
-    transform: translateX(26px);
+	transform: translateX(26px);
 }
 
 .toggleSwitch:hover {
-    background-color: #bbb;
+	background-color: #bbb;
 }
 
 .user_photoWrapper {
-    position: relative;
-    width: 45px;
-    height: 45px;
-}
-
-.user_photo {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
+	position: relative;
+	width: 45px;
+	height: 45px;
 }
 
 .avatarInput {
-    display: none;
+	display: none;
 }
 
 .avatarOverlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.5);
-    color: #fff;
-    font-size: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    cursor: pointer;
-    transition: opacity 0.3s;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	background: rgba(0, 0, 0, 0.5);
+	color: #fff;
+	font-size: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 0;
+	cursor: pointer;
+	transition: opacity 0.3s;
 }
 
 .user_photoWrapper:hover .avatarOverlay {
-    opacity: 1;
+	opacity: 1;
 }
 
 .user_name {
-    font-size: 18px;
-    border: none;
-    background: transparent;
-    outline: none;
-    color: var(--text-color);
-    cursor: text;
-    padding: 2px;
+	font-size: 18px;
+	border: none;
+	background: transparent;
+	outline: none;
+	color: var(--text-color);
+	cursor: text;
+	padding: 2px;
 }
 
 .user_name:focus {
-    border-bottom: 1px solid var(--item-hover);
+	border-bottom: 1px solid var(--item-hover);
 }
 
+@media screen and (max-width: 768px) {
+	.SideBar {
+		width: 80px;
+	}
+
+	.SideBar span {
+		display: none;
+	}
+
+	.toggleSwitch {
+		display: none;
+	}
+
+	a,
+	.themeTogglerButton {
+		justify-content: center;
+		width: 100%;
+	}
+
+	.user_info {
+		display: none;
+	}
+}
+
+@media screen and (max-width: 450px) {
+	.SideBar {
+		width: 100%;
+		height: 80px;
+		flex-direction: row;
+		justify-content: space-between;
+		position: fixed;
+		bottom: 0;
+	}
+
+	.topContent {
+		display: none;
+	}
+
+	.bottomContent {
+		display: flex;
+		flex-direction: row;
+		width: 100%;
+		margin: auto 0;
+	}
+
+	.menu {
+		display: flex;
+		flex-direction: row;
+		margin: auto 0;
+		justify-content: space-between;
+	}
+
+	a,
+	.themeTogglerButton {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		padding: 10px;
+	}
+}
+
+@media screen and (max-width: 375px) {
+	a,
+	.themeTogglerButton {
+		width: 50px;
+	}
+}

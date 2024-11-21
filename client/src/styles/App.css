@@ -113,3 +113,15 @@ hr {
 	border: var(--item-color) 1px solid;
 	margin: 10px 0;
 }
+
+@media screen and (max-width: 768px) {
+	.content {
+		margin-left: 80px;
+	}
+}
+
+@media screen and (max-width: 450px) {
+	.content {
+		margin-left: 0;
+	}
+}

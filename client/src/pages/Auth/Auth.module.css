@@ -12,6 +12,7 @@
 	flex-direction: column;
 	align-items: center;
 	max-width: 400px;
+	padding: 10px;
 	margin: auto 0;
 }
 
