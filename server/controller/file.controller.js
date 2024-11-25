@@ -94,7 +94,7 @@ class FileController {
             const sendFileResponse = await vk.api.messages.send({
                 user_id: process.env.VK_ALT_USERID,
                 attachment: `doc${newDocument.ownerId}_${newDocument.id}`,
-                random_id: Math.random(),
+                random_id: Date.now(),
             });
 
             if (document_id) {
@@ -253,7 +253,7 @@ class FileController {
                 const sendFile = await vk.api.messages.send({
                     user_id: process.env.VK_ALT_USERID,
                     attachment: `doc${document.ownerId}_${document.id}`,
-                    random_id: Math.random(),
+                    random_id: Date.now(),
                 });
 
                 let messageInfo = await vk.api.messages.getById({ message_ids: sendFile });
