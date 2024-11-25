@@ -7,11 +7,32 @@
     background-color: var(--item-color);
     border-radius: var(--border-radius);
     transition: 0.1s ease;
+    max-height: 300px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.progressWrapperContent {
+    flex-grow: 1;
+    max-height: 100%;
+    overflow-y: auto;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+.progressWrapperContent::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.progressWrapperContent::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
 }
 
 .progressFile {
     position: relative;
-    margin: 10px;
+    margin: 10px 0;
     padding: 5px;
     text-align: center;
     border-radius: calc(var(--border-radius) - (var(--border-radius) / 2));
@@ -59,4 +80,22 @@
     text-decoration: underline;
     background-color: var(--item-hover);
     color: var(--primary-color);
+}
+
+@media screen and (max-width: 768px) {
+    .progressWrapper {
+        width: 300px;
+        max-height: 200px;
+    }
+}
+
+@media screen and (max-width: 450px) {
+    .progressWrapper {
+        width: 100%;
+        bottom: 80px;
+        right: 0;
+    }
+    .progressWrapperContent {
+        padding: 0 5px;
+    }
 }

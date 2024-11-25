@@ -266,13 +266,14 @@ const Drive = () => {
 
         {isLoading && (
           <div className={styles.progressWrapper}>
-            {progress.map((item, index) => (
-              <div key={index} className={styles.progressFile}>
-                <span>{item.name}: {item.progress}%</span>
-                <div className={styles.progress} style={{ width: `${item.progress}%` }}>
+            <div className={styles.progressWrapperContent}>
+                {progress.map((item, index) => (
+                <div key={index} className={styles.progressFile}>
+                    <span>{item.name}: {item.progress}%</span>
+                    <div className={styles.progress} style={{ width: `${item.progress}%` }}></div>
                 </div>
-              </div>
             ))}
+            </div>
           </div>
         )}
 
@@ -291,4 +292,3 @@ const Drive = () => {
 };
 
 export default Drive;
-
