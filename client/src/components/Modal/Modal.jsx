@@ -19,7 +19,7 @@ const Modal = (data) => {
 
     return (
         <div className={styles.ModalWrapper}>
-            <div className={styles.Modal}>
+            <form className={styles.Modal} onSubmit={handleSubmit}>
                 <div className={styles.ModalHeader}>
                     <h2>{modal.header}</h2>
                 </div>
@@ -32,11 +32,12 @@ const Modal = (data) => {
                     />
                 </div>
                 <div className={styles.ModalFooter}>
-                    <Button variant='primary' type='submit' onClick={handleSubmit}>Создать</Button>
+                    <Button variant='primary' type='submit'>Создать</Button>
                     <Button variant='secondary' type='button' onClick={() => modal.onSubmit(null)}>Отмена</Button>
                 </div>
-            </div>
+            </form>
         </div>
+
     );
 };
 
