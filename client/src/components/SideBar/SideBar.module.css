@@ -23,6 +23,10 @@
 	object-fit: cover;
 }
 
+.mobileLink {
+    display: none;
+}
+
 .user_info {
 	margin-left: 10px;
 	display: flex;
@@ -190,6 +194,7 @@ a:active {
 	.SideBar {
 		width: 100%;
 		height: 80px;
+        padding: 5px;
 		flex-direction: row;
 		justify-content: space-between;
 		position: fixed;
@@ -208,11 +213,12 @@ a:active {
 	}
 
 	.menu {
-		display: flex;
-		flex-direction: row;
-		margin: auto 0;
-		justify-content: space-between;
+		display: none;
 	}
+
+    .mobileLink {
+        display: flex;
+    }
 
 	a,
 	.themeTogglerButton {
@@ -221,13 +227,12 @@ a:active {
 		align-items: center;
 		justify-content: center;
 		text-align: center;
-		padding: 10px;
 	}
 }
 
 @media screen and (max-width: 375px) {
 	a,
 	.themeTogglerButton {
-		width: 50px;
+		padding: 5px;
 	}
 }

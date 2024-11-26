@@ -1,3 +1,9 @@
 .Section {
     padding: 10px 0;
 }
+
+@media screen and (max-width: 450px) {
+    .Section {
+        padding-bottom: 100px;
+    }
+}

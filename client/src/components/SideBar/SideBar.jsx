@@ -95,14 +95,16 @@ const SideBar = () => {
             </div>
 
             <div className={styles.menu}>
-                {['/drive'].map((path, index) => (
-                    <Link key={index} to={path}>
-                        <FontAwesomeIcon icon={[faHouse, faClock, faStar][index]} className={styles.icon} />
-                        <span>{['Главная'][index]}</span>
-                    </Link>
-                ))}
+                <Link to="/drive">
+                    <FontAwesomeIcon icon={faHouse} className={styles.icon} />
+                    <span>Главная</span>
+                </Link>
             </div>
             <div className={styles.bottomContent}>
+                <Link to="/drive" className={styles.mobileLink}>
+                    <FontAwesomeIcon icon={faHouse} className={styles.icon} />
+                    <span>Главная</span>
+                </Link>
                 {user.role === 'admin' && (
                     <Link to="/admin">
                         <FontAwesomeIcon icon={faUserTie} className={styles.icon} />

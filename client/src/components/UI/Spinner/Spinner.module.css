@@ -25,3 +25,15 @@
         transform: rotate(360deg);
     }
 }
+
+@media screen and (max-width: 768px) {
+	.Spinner {
+		padding-left: 80px;
+	}
+}
+
+@media screen and (max-width: 450px) {
+	.Spinner {
+		padding-left: 0px;
+	}
+}

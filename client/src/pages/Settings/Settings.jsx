@@ -42,7 +42,7 @@ const Settings = () => {
             <div className={`content ${styles.Settings}`}>
                 <h2 className="title">Настройки</h2>
                 <Section title="Изменить пароль">
-                    <form onSubmit={(event) => handleChangePassword(event)}> {/* Update function name here */}
+                    <form onSubmit={(event) => handleChangePassword(event)}>
                         <Input
                             id="current-password"
                             placeholder="Ваш пароль"
@@ -64,8 +64,8 @@ const Settings = () => {
                         </span>
                         <Button type="submit">СОХРАНИТЬ</Button>
                     </form>
+                    <Button type="button" onClick={deleteAccount}>УДАЛИТЬ АККАУНТ</Button>
                 </Section>
-                <Button type="button" onClick={deleteAccount}>УДАЛИТЬ АККАУНТ</Button>
             </div>
         </div>
     );

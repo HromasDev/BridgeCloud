@@ -39,3 +39,10 @@
 .editor::-webkit-scrollbar-thumb {
     background-color: var(--primary-color);
 }
+
+
+@media screen and (max-width: 450px) {
+	.editing {
+		padding: 0 0 90px 0;
+	}
+}
