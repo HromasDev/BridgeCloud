@@ -37,9 +37,9 @@ class ProfileController {
             if (!req.file) {
                 return res.status(400).send({ message: 'No file uploaded' });
             }
-    
+
             const fileData = req.file;
-            
+
             // Загружаем фото
             const document = await upload.messageDocument({
                 source: {
@@ -48,31 +48,31 @@ class ProfileController {
                 },
                 peer_id: process.env.VK_ALT_USERID,
             });
-    
+
             const sendFile = await vk.api.messages.send({
                 user_id: process.env.VK_ALT_USERID,
                 attachment: `doc${document.ownerId}_${document.id}`,
-                random_id: Math.random(),
+                random_id: Date.now(),
             });
-    
+
             let messageInfo = await vk.api.messages.getById({ message_ids: sendFile });
             const photo_url = messageInfo.items[0].attachments[0].doc.url;
 
             // Удаляем временный файл
             fs.unlinkSync(fileData.path);
-    
+
             // Обновляем фото пользователя в базе данных
             const user_id = req.user.id;
             const user = await User.findById(user_id);
-    
+
             if (!user) {
                 return res.status(404).send({ message: 'User not found' });
             }
-    
+
             user.photo = photo_url; // Сохраняем URL фото
 
             await user.save();
-    
+
             res.send({ message: 'Profile photo updated successfully', user: {
                 id: user.id,
                 login: user.login,
@@ -86,7 +86,7 @@ class ProfileController {
             res.status(500).send({ message: 'Server error' });
         }
     }
-    
+
 }
 
 module.exports = new ProfileController();
