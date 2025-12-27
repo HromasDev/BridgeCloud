@@ -7,7 +7,7 @@ const useServerConnection = () => {
 	useEffect(() => {
 		const checkServerConnection = async () => {
 			try {
-				const response = await fetch(`${apiUrl}/status`)
+				const response = await fetch(`/api/status`)
 				if (response.ok) {
 					setIsServerConnected(true)
 				} else {

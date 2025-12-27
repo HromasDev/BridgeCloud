@@ -1,10 +1,10 @@
-import axios from "axios";
-import { logout, setUser } from '../redux/userSlice.js';
+import axios from "axios"
+import { logout, setUser } from '../redux/userSlice.js'
 const apiUrl = import.meta.env.VITE_API_URL
 
 export const registerAction = async (login, password) => {
     try {
-        await axios.post(`${apiUrl}/auth/register`, {
+        await axios.post(`/api/auth/register`, {
             login,
             password
         });
@@ -16,7 +16,7 @@ export const registerAction = async (login, password) => {
 export const loginAction = (login, password) => {
     return async (dispatch) => {
         try {
-            const response = await axios.post(`${apiUrl}/auth/login`, {
+            const response = await axios.post(`/api/auth/login`, {
                 login,
                 password
             });
@@ -34,7 +34,7 @@ export const authAction = () => {
     return async (dispatch) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${apiUrl}/auth/auth`, {
+            const response = await axios.get(`/api/auth/auth`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -51,7 +51,7 @@ export const authAction = () => {
 export const changePassword = async (userId, currentPassword, newPassword) => {
     try {
         const token = localStorage.getItem('token');
-        const response = await axios.post(`${apiUrl}/user/${userId}/change-password`, {
+        const response = await axios.post(`/api/user/${userId}/change-password`, {
             currentPassword,
             newPassword
         }, {
@@ -69,7 +69,7 @@ export const changePhoto = async (dispatch, userId, formData) => {
     try {
         const token = localStorage.getItem('token');
         const response = await axios.post(
-            `${apiUrl}/profile/${userId}/change-photo`,
+            `/api/profile/${userId}/change-photo`,
             formData,
             {
                 headers: {
@@ -92,7 +92,7 @@ export const changePhoto = async (dispatch, userId, formData) => {
 export const changeName = async (dispatch, userId, name) => {
     try {
         const token = localStorage.getItem('token');
-        const response = await axios.post(`${apiUrl}/profile/${userId}/change-name`, {
+        const response = await axios.post(`/api/profile/${userId}/change-name`, {
             name
         }, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -110,7 +110,7 @@ export const changeName = async (dispatch, userId, name) => {
 export const accountDelete = async (dispatch, userId) => {
     try {
         const token = localStorage.getItem('token');
-        const response = await axios.delete(`${apiUrl}/user`, {
+        const response = await axios.delete(`/api/user`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 

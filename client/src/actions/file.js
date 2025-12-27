@@ -1,12 +1,12 @@
-import axios from 'axios';
-import { addFile, addFolder, clearProgress, moveFile, removeFile, removeFolder, renameFile, renameFolder, setFiles, setFolders, setLoading, setProgress, updateFileData } from '../redux/storageSlice.js';
+import axios from 'axios'
+import { addFile, addFolder, clearProgress, moveFile, removeFile, removeFolder, renameFile, renameFolder, setFiles, setFolders, setLoading, setProgress, updateFileData } from '../redux/storageSlice.js'
 const apiUrl = import.meta.env.VITE_API_URL
 
 export const getFiles = async (dispatch) => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await axios.get(`${apiUrl}/file`, {
+        const response = await axios.get(`/api/file`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
@@ -24,7 +24,7 @@ export const createFile = async (dispatch, name, type, currentFolder) => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await axios.post(`${apiUrl}/file/new`, {
+        const response = await axios.post(`/api/file/new`, {
             name,
             type,
             folder: currentFolder,
@@ -59,7 +59,7 @@ export const uploadFiles = async (dispatch, acceptedFiles, currentFolder) => {
         formData.append('files', file);
         formData.append('folder', currentFolder);
 
-        return axios.post(`${apiUrl}/file`, formData, {
+        return axios.post(`/api/file`, formData, {
             onUploadProgress: (progressEvent) => {
                 const percentComplete = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                 dispatch(setProgress({ index: index, name: file.name, progress: percentComplete }));
@@ -90,7 +90,7 @@ export const deleteFiles = async (dispatch, data) => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await axios.delete(`${apiUrl}/file`, {
+        const response = await axios.delete(`/api/file`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
@@ -113,7 +113,7 @@ export const deleteFolders = async (dispatch, data) => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await axios.delete(`${apiUrl}/file`, {
+        const response = await axios.delete(`/api/file`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
@@ -133,7 +133,7 @@ export const rename = async (dispatch, data) => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await axios.post(`${apiUrl}/file/rename`, data, {
+        const response = await axios.post(`/api/file/rename`, data, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             }
@@ -151,7 +151,7 @@ export const moveFiles = async (dispatch, data) => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await axios.post(`${apiUrl}/file/move`, data, {
+        const response = await axios.post(`/api/file/move`, data, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             }
@@ -173,7 +173,7 @@ export const getFileData = async (dispatch, file) => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await axios.get(`${apiUrl}/file/${file.document_id}`, {
+        const response = await axios.get(`/api/file/${file.document_id}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
@@ -189,7 +189,7 @@ export const saveFileData = async (dispatch, data) => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await axios.put(`${apiUrl}/file`, data, {
+        const response = await axios.put(`/api/file`, data, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
